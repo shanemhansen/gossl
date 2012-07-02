@@ -8,6 +8,8 @@ They should run as fast as an equivalant c program (sha256sum).
 
 #instructions
 
+Make sure you have libssl-dev and libssl1.0.0 installed on your system.
+This is needed to link against openssl.
 This is a standard go package, so you should be able to just:
 go install ssl hashfile hashstring
 
