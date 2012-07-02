@@ -44,7 +44,7 @@ func (self *SHA256Hash) Size() int {
     return C.SHA256_DIGEST_LENGTH
 }
 func (self *SHA256Hash) Reset() {
-    panic("not implemented")
+    C.SHA256_Init(&self.sha)
 }
 func (self *SHA256Hash) Sum(b []byte) []byte {
     digest := make([]C.uchar, self.Size())
