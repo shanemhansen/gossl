@@ -47,16 +47,18 @@ func (self *SHA256Hash) Reset() {
     panic("not implemented")
 }
 func (self *SHA256Hash) Sum(b []byte) []byte {
-    if b != nil {
-        panic("I don't know what that means, pass in nil")
-    }
     digest := make([]C.uchar, self.Size())
     if C.SHA256_Final(&digest[0], &self.sha) != 1 {
         panic("couldn't finalize digest")
     }
-    result := make([]byte, len(digest))
-    for i, value := range digest {
-        result[i] = byte(value)
+    var result []byte
+    if b != nil {
+        result = make([]byte, 0)
+    } else {
+        result = b
+    }
+    for _, value := range digest {
+        result = append(result, byte(value))
     }
     return result
 }
