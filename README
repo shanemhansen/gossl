@@ -1,0 +1,15 @@
+ssl is a 100% incomplete go library for interfacing with the venerable
+openssl library. It currently provides a hash.Hash sha256 implementation
+backed by openssl.
+
+Also included are a couple command line utilities for hashing files and strings.
+They should run as fast as an equivalant c program (sha256sum).
+
+
+#instructions
+
+This is a standard go package, so you should be able to just:
+go install ssl hashfile hashstring
+
+hashfile /etc/hosts
+hashstring 'something'
