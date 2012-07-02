@@ -1,4 +1,4 @@
-package ssl
+package sha256
 
 /*
 #include <errno.h>
@@ -13,12 +13,17 @@ package ssl
 */
 import "C"
 import "unsafe"
+import "hash"
+//some constants to match the interface of the official crypto/sha256
+const BlockSize = 64
+const Size = 32
+
 
 type SHA256Hash struct {
     sha C.SHA256_CTX
 }
 
-func NewSHA256Hash() *SHA256Hash {
+func New() hash.Hash {
     hash := new(SHA256Hash)
     if C.SHA256_Init(&hash.sha) != 1 {
         panic("problem creating hash")
