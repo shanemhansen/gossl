@@ -1,3 +1,5 @@
+// Package sha256 implements the SHA224 and SHA256 hash algorithms
+// in FIPS 180-2.
 package sha256
 
 /*
@@ -14,15 +16,16 @@ package sha256
 import "C"
 import "unsafe"
 import "hash"
-//some constants to match the interface of the official crypto/sha256
+
 const BlockSize = 64
 const Size = 32
 
-
+// SHA256Hash is a wrapper around OpenSSL's SHA256_CTX
 type SHA256Hash struct {
     sha C.SHA256_CTX
 }
 
+// New returns a new sha256 hash.Hash
 func New() hash.Hash {
     hash := new(SHA256Hash)
     if C.SHA256_Init(&hash.sha) != 1 {
@@ -30,6 +33,7 @@ func New() hash.Hash {
     }
     return hash
 }
+
 func (self *SHA256Hash) Write(msg []byte) (n int, err error) {
     size := C.size_t(len(msg))
     if C.SHA256_Update(&self.sha, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
