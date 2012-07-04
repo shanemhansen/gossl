@@ -3,6 +3,7 @@ openssl library. It currently provides a dropin replacement for:
 crypto/sha512
 crypto/sha256
 crypto/sha
+crypto/aes (the aes 128, 192, and 256 ECB mode ciphers)
 
 Also included are a couple example command line utilities for hashing files and strings.
 They should run as fast as an equivalant c program (sha256sum).
