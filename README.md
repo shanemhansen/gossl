@@ -26,7 +26,7 @@ Whatever I have time to do. I'd like to create a set of dropin replacements
 for the go crypto/* packages. Also, I want to enable support for ssl on
 go sockets, so go programs can take advantage of the performance of OpenSSL.
 
-instructions
+Instructions
 ============
 
 Make sure you have libssl-dev and libssl1.0.0 installed on your system.
