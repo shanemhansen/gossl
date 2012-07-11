@@ -5,9 +5,9 @@ import "time"
 import "hash"
 import "crypto/rand"
 import "crypto/sha256"
-import sslSha256 "ssl/sha256"
+import sslSha256 "go-ssl/sha256"
 
-func bench(h *hash.Hash, msg string) {
+func bench_sha256(h *hash.Hash, msg string) {
     bufsize := 10240
     iterations := 10000
     buf := make([]byte, bufsize)
@@ -25,7 +25,7 @@ func bench(h *hash.Hash, msg string) {
 func main() {
     fmt.Println("This program benchmarks crypto/sha256 and aes/sha256 implementations")
     h := sha256.New()
-    bench(&h, "crypto/sha256")
+    bench_sha256(&h, "crypto/sha256")
     ssl := sslSha256.New()
-    bench(&ssl, "ssl/aes")
+    bench_sha256(&ssl, "ssl/aes")
 }

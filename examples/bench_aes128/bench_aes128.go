@@ -6,7 +6,7 @@ import "crypto/cipher"
 import "crypto/aes"
 import sslAES "go-ssl/aes"
 
-func bench(h *cipher.Block, msg string) {
+func bench_aes128(h *cipher.Block, msg string) {
     bufsize := 102400
     iterations := 10000
     src := make([]byte, bufsize)
@@ -23,7 +23,7 @@ func main() {
     fmt.Println("This program benchmarks crypto/aes and aes/aes implementations")
     k := []byte("1234567890123456")
     h, _ := aes.NewCipher(k)
-    bench(&h, "crypto/aes")
+    bench_aes128(&h, "crypto/aes")
     ssl, _ := sslAES.NewCipher(k)
-    bench(&ssl, "ssl/aes")
+    bench_aes128(&ssl, "ssl/aes")
 }
