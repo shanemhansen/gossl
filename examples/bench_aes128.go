@@ -4,7 +4,7 @@ import "fmt"
 import "time"
 import "crypto/cipher"
 import "crypto/aes"
-import sslAES "ssl/aes"
+import sslAES "go-ssl/aes"
 
 func bench(h *cipher.Block, msg string) {
     bufsize := 102400

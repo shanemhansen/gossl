@@ -1,7 +1,7 @@
 package main
 
 import "fmt"
-import "ssl/sha256"
+import "go-ssl/sha256"
 import "flag"
 
 func main() {

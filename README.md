@@ -32,7 +32,7 @@ Instructions
 Make sure you have libssl-dev and libssl1.0.0 installed on your system.
 This is needed to link against openssl.
 This is a standard go package, so you should be able to just:
-go install ssl hashfile hashstring
+go install go-ssl/hashfile go-ssl/hashstring
 
 hashfile /etc/hosts
 hashstring 'something'
