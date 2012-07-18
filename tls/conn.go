@@ -137,10 +137,10 @@ func sslErrorMessage() string {
             msg += C.GoString(data)+"\n"
         }
         if flags&C.ERR_TXT_MALLOCED != 0{
-            C.CRYPTO_free(unsafe.Pointer(data))
+//            C.CRYPTO_free(unsafe.Pointer(data))
         } else {
             //regular free.
-            C.free(unsafe.Pointer(data))
+//            C.free(unsafe.Pointer(data))
         }
     }
     return msg
