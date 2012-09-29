@@ -4,7 +4,6 @@ package gossl
 #cgo pkg-config: openssl
 #include "openssl/ssl.h"
 #include "openssl/err.h"
-extern BIO_METHOD* BIO_s_conn(void);
 extern void go_conn_put_error(const char*);
 */
 import "C"
