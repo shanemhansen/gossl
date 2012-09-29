@@ -1,4 +1,4 @@
-package x509
+package openssl
 
 import "testing"
 

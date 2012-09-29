@@ -4,7 +4,7 @@ import "net"
 import "fmt"
 import "html"
 import "flag"
-import "go-ssl/tls"
+import "github.com/shanemhansen/go-ssl/openssl"
 import "net/http"
 import cryptotls "crypto/tls"
 
@@ -24,12 +24,15 @@ func main() {
     certs := []cryptotls.Certificate{cert}
     config.Certificates = certs
     l, err := net.Listen("tcp", ":8000")
-    l, err = tls.NewListener(l, config)
+    l, err = openssl.NewListener(l, config)
     if err != nil {
         panic(err)
     }
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Hello, %q\n", html.EscapeString(r.URL.Path))
     })
-    http.Serve(l, nil)
+    for {
+        http.Serve(l, nil)
+    }
+    fmt.Println(err)
 }

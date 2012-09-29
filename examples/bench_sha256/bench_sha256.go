@@ -5,15 +5,15 @@ import "time"
 import "hash"
 import "crypto/rand"
 import "crypto/sha256"
-import sslSha256 "go-ssl/sha256"
+import sslSha256 "github.com/shanemhansen/go-ssl/sha256"
 
 func bench_sha256(h *hash.Hash, msg string) {
     bufsize := 10240
     iterations := 10000
     buf := make([]byte, bufsize)
-    n, err := rand.Read(buf) 
+    n, err := rand.Read(buf)
     t := time.Now()
-    for i:=0; i< iterations; i++ {
+    for i := 0; i < iterations; i++ {
         if err != nil {
             panic("problem reading random data")
         }

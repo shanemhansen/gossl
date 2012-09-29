@@ -1,4 +1,4 @@
-package tls
+package openssl
 
 /*
 #include "openssl/ssl.h"
@@ -8,11 +8,11 @@ package tls
 */
 import "C"
 import "errors"
-import "go-ssl/x509"
+import "github.com/shanemhansen/go-ssl/openssl/evp"
+
 import "net"
 
 //import "fmt"
-import "unsafe"
 import cryptotls "crypto/tls"
 import cryptorsa "crypto/rsa"
 import cryptox509 "crypto/x509"
@@ -32,11 +32,11 @@ func Init() int {
 type Listener struct {
     net.Listener
     config *cryptotls.Config
-    ctx    *C.SSL_CTX
+    ctx    *Context
 }
 
 // Wrap a connection using an existing ssl context
-func Server(conn net.Conn, config *cryptotls.Config, ctx *C.SSL_CTX) (c *Conn, err error) {
+func Server(conn net.Conn, config *cryptotls.Config, ctx *Context) (c *Conn, err error) {
     c, err = NewConn(&Conn{conn: conn, config: config, ctx: ctx})
     return
 }
@@ -51,7 +51,7 @@ func (self *Listener) Accept() (net.Conn, error) {
     myconnection, err := Server(c, self.config, self.ctx)
     //ssl_err := myconnection.Handshake()
     ssl_err := myconnection.Handshake()
-    if ssl_err != C.SSL_ERROR_NONE {
+    if ssl_err != nil {
         return nil, errors.New("Handshake problem" + sslErrorMessage())
     }
     return myconnection, nil
@@ -71,19 +71,8 @@ func extractDERKey(Kr interface{}) ([]byte, error) {
 
 }
 
-//create an OpenSSL EVP_PKEY object
-func loadPrivateKey(buf []byte) (*C.EVP_PKEY, error) {
-    bio := C.BIO_new_mem_buf(unsafe.Pointer(&buf[0]), C.int(len(buf)))
-    if bio == nil {
-        return nil, errors.New("problem converting der key to openssl key")
-    }
-
-    pkey := C.d2i_PrivateKey_bio(bio, nil)
-
-    if pkey == nil {
-        return nil, errors.New(sslErrorMessage())
-    }
-    return pkey, nil
+//More OpenSSL'ish interface to create a listener
+func NewListenerFromContext(inner net.Listener) {
 }
 
 //Wrap an existing listener + crypto config and return a new TLS enabled listener.
@@ -92,7 +81,7 @@ func NewListener(inner net.Listener, config *cryptotls.Config) (*Listener, error
     l.Listener = inner
     l.config = config
     //FIXME hardcoded in method
-    l.ctx = C.SSL_CTX_new(C.SSLv23_method())
+    l.ctx = NewContext(SSLv23Method())
     if l.ctx == nil {
         msg := sslErrorMessage()
         return nil, errors.New("problem creating ssl context:\n" + msg)
@@ -101,20 +90,29 @@ func NewListener(inner net.Listener, config *cryptotls.Config) (*Listener, error
     //grab the private key
     Kr := config.Certificates[0].PrivateKey
     private_key_der, err := extractDERKey(Kr)
-    private_key, err := loadPrivateKey(private_key_der)
-    //set the private key into the context
-    if int(C.SSL_CTX_use_PrivateKey(l.ctx, private_key)) != 1 {
-        return nil, errors.New("problem loading key " + sslErrorMessage())
-    }
-    cert, err := x509.ParseCertificate(config.Certificates[0].Certificate[0])
+    private_key, err := evp.LoadPrivateKeyDER(private_key_der)
     if err != nil {
         return nil, err
     }
-    if int(C.SSL_CTX_use_certificate(l.ctx, (*C.X509)(unsafe.Pointer(cert.X509)))) != 1 {
-        return nil, errors.New("problem loading cert " + sslErrorMessage())
+    //set the private key into the context
+    err = l.ctx.UsePrivateKey(private_key)
+    if err != nil {
+        return nil, errors.New("problem loading key " + sslErrorMessage())
     }
+    cert, err := ParseCertificate(config.Certificates[0].Certificate[0])
+    if err != nil {
+        return nil, err
+    }
+    err = l.ctx.UseCertificate(cert)
+    if err != nil {
+        return nil, errors.New("problem loading key " + sslErrorMessage())
+    }
+    //    if int(C.SSL_CTX_use_certificate(l.ctx.Ctx, (*C.X509)(unsafe.Pointer(cert.X509)))) != 1 {
+    //        return nil, errors.New("problem loading cert " + sslErrorMessage())
+    //    }
     return l, nil
 }
+
 //Listen on network, laddr and return a listener that will handle TLS connections.
 func Listen(network, laddr string, config *cryptotls.Config) (*Listener, error) {
     if config == nil || len(config.Certificates) == 0 {

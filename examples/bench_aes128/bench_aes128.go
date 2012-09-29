@@ -4,7 +4,7 @@ import "fmt"
 import "time"
 import "crypto/cipher"
 import "crypto/aes"
-import sslAES "go-ssl/aes"
+import sslAES "github.com/shanemhansen/go-ssl/aes"
 
 func bench_aes128(h *cipher.Block, msg string) {
     bufsize := 102400
@@ -12,7 +12,7 @@ func bench_aes128(h *cipher.Block, msg string) {
     src := make([]byte, bufsize)
     dst := make([]byte, bufsize)
     t := time.Now()
-    for i:=0; i< iterations; i++ {
+    for i := 0; i < iterations; i++ {
         (*h).Encrypt(src, dst)
         (*h).Encrypt(dst, src)
     }

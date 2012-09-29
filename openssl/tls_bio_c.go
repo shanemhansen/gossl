@@ -1,4 +1,4 @@
-package tls
+package openssl
 
 /*
 #cgo pkg-config: openssl

@@ -3,7 +3,7 @@ package main
 import "os"
 import "io"
 import "fmt"
-import "go-ssl/sha256"
+import "github.com/shanemhansen/go-ssl/sha256"
 import "flag"
 
 func main() {
@@ -28,4 +28,3 @@ func main() {
         fmt.Printf("%x %s\n", h.Sum(nil), fname)
     }
 }
-

@@ -3,7 +3,8 @@
 // interface when compared to OpenSSL imo.
 // These methods will basically be helpful in the tls/ssl packages for
 // passing in certificate objects to the context.
-package x509
+package openssl
+
 /*
 #include <errno.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@ package x509
 
 #include "openssl/x509.h"
 #include "openssl/bio.h"
+#include "openssl/pem.h"
 #cgo pkg-config: openssl
 
 
@@ -19,7 +21,6 @@ package x509
 import "C"
 import "unsafe"
 import "errors"
-import "encoding/pem"
 
 //A wrapper around OpenSSL's X509
 type Certificate struct {
@@ -35,14 +36,21 @@ func (self *Certificate) DumpDERCertificate() ([]byte, error) {
         return nil, errors.New("problem dumping certificate")
     }
     var temp *C.char
-    buf_len :=  C.BIO_ctrl(bio,  C.BIO_CTRL_INFO, 0, unsafe.Pointer(&temp))
+    buf_len := C.BIO_ctrl(bio, C.BIO_CTRL_INFO, 0, unsafe.Pointer(&temp))
     return C.GoBytes(unsafe.Pointer(temp), C.int(buf_len)), nil
 }
 
 //Helper function that calls encoding/pem to convert DER to PEM
 func ParseCertificatePEM(pemData []byte) (*Certificate, error) {
-    asn1Block, _ := pem.Decode(pemData)
-    return ParseCertificate(asn1Block.Bytes)
+    length := C.int(len(pemData))
+    buffer := unsafe.Pointer(&pemData[0])
+    bio := C.BIO_new_mem_buf(buffer, length)
+    cert := C.PEM_read_bio_X509(bio, nil, nil, nil)
+    if cert == nil {
+        return nil, errors.New("problem loading certificate" + sslErrorMessage())
+    }
+    return &Certificate{X509: cert}, nil
+
 }
 
 //Import an OpenSSL X509 certificate from a DER buffer
@@ -54,7 +62,7 @@ func ParseCertificate(asn1Data []byte) (*Certificate, error) {
     bio := C.BIO_new_mem_buf(buffer, length)
     sslCert := C.d2i_X509_bio(bio, nil)
     if sslCert == nil {
-        return nil, errors.New("problem loading cert")
+        return nil, errors.New("problem loading cert" + sslErrorMessage())
     }
     cert := new(Certificate)
     cert.X509 = sslCert
