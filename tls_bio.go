@@ -1,4 +1,4 @@
-package openssl
+package gossl
 
 /*
 #cgo pkg-config: openssl
@@ -24,7 +24,7 @@ func go_conn_bio_write(bio *C.BIO, buf *C.char, num C.int) C.int {
     //See http://code.google.com/p/go-wiki/wiki/cgo
     if err != nil && err != io.EOF {
         //return Error to openssl
-        C.ERR_put_error(library_code, 0, 0, C.CString("go-ssl/tls/bio.go"), 37)
+        C.ERR_put_error(library_code, 0, 0, C.CString("gossl/bio.go"), 37)
         C.go_conn_put_error(C.CString(fmt.Sprintf("%s", err)))
         return C.int(-1)
     }
@@ -40,7 +40,7 @@ func go_conn_bio_read(bio *C.BIO, buf *C.char, num C.int) C.int {
     if err != nil && err != io.EOF {
         fmt.Println(err)
         //return Error to openssl
-        C.ERR_put_error(library_code, 0, 0, C.CString("go-ssl/tls/bio.go"), 51)
+        C.ERR_put_error(library_code, 0, 0, C.CString("gossl/bio.go"), 51)
         C.go_conn_put_error(C.CString(fmt.Sprintf("%s", err)))
         return C.int(-1)
     }

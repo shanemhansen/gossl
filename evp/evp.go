@@ -10,7 +10,7 @@ package evp
 import "C"
 import "unsafe"
 import "errors"
-import "github.com/shanemhansen/go-ssl/openssl/err"
+import "github.com/shanemhansen/gossl/err"
 
 type PKey struct {
     PKey *C.EVP_PKEY

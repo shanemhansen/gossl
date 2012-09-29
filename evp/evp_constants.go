@@ -1,6 +1,6 @@
 package evp
 
-import "github.com/shanemhansen/go-ssl/openssl/nid"
+import "github.com/shanemhansen/gossl/nid"
 
 //cribbed from evp.h
 var PK_RSA int = 0x0001

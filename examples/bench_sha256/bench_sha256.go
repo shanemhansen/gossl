@@ -5,7 +5,7 @@ import "time"
 import "hash"
 import "crypto/rand"
 import "crypto/sha256"
-import sslSha256 "github.com/shanemhansen/go-ssl/sha256"
+import sslSha256 "github.com/shanemhansen/gossl/sha256"
 
 func bench_sha256(h *hash.Hash, msg string) {
     bufsize := 10240

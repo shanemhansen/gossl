@@ -3,7 +3,7 @@
 // interface when compared to OpenSSL imo.
 // These methods will basically be helpful in the tls/ssl packages for
 // passing in certificate objects to the context.
-package openssl
+package gossl
 
 /*
 #include <errno.h>

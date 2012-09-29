@@ -1,4 +1,4 @@
-package openssl
+package gossl
 
 import "testing"
 

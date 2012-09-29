@@ -1,7 +1,7 @@
 package engines
 
 import "testing"
-import "github.com/shanemhansen/go-ssl/openssl/nid"
+import "github.com/shanemhansen/gossl/nid"
 
 //These tests depend on your hardware and kernel.
 func TestStructuralEngines(t *testing.T) {

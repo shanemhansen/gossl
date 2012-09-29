@@ -1,4 +1,4 @@
-package openssl
+package gossl
 /*
 #cgo pkg-config: openssl
 #include "openssl/ssl.h"

@@ -4,7 +4,7 @@ import "fmt"
 import "time"
 import "crypto/cipher"
 import "crypto/aes"
-import sslAES "github.com/shanemhansen/go-ssl/aes"
+import sslAES "github.com/shanemhansen/gossl/aes"
 
 func bench_aes128(h *cipher.Block, msg string) {
     bufsize := 102400

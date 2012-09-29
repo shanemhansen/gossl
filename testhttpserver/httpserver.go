@@ -4,7 +4,7 @@ import "net"
 import "fmt"
 import "html"
 import "flag"
-import "github.com/shanemhansen/go-ssl/openssl"
+import "github.com/shanemhansen/gossl"
 import "net/http"
 import cryptotls "crypto/tls"
 
@@ -24,7 +24,7 @@ func main() {
     certs := []cryptotls.Certificate{cert}
     config.Certificates = certs
     l, err := net.Listen("tcp", ":8000")
-    l, err = openssl.NewListener(l, config)
+    l, err = gossl.NewListener(l, config)
     if err != nil {
         panic(err)
     }

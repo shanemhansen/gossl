@@ -1,4 +1,4 @@
-package openssl
+package gossl
 
 /*
 #include "openssl/ssl.h"
@@ -8,7 +8,7 @@ package openssl
 */
 import "C"
 import "errors"
-import "github.com/shanemhansen/go-ssl/openssl/evp"
+import "github.com/shanemhansen/gossl/evp"
 
 import "net"
 
