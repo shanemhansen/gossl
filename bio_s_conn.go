@@ -5,26 +5,35 @@ package gossl
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 extern void go_conn_put_error(const char*);
+extern void set_errno(int);
 */
 import "C"
 import "io"
 import "unsafe"
 import "reflect"
+import "syscall"
 import "fmt"
+import "net"
 
-var library_code C.int = C.ERR_get_next_error_library()
+var _ = fmt.Println
 
 //export go_conn_bio_write
 func go_conn_bio_write(bio *C.BIO, buf *C.char, num C.int) C.int {
-    var conn *Conn = (*Conn)(C.BIO_get_ex_data(bio, 0))
+    var conn *Conn = (*Conn)(bio.ptr)
     var size int = int(num)
     data := GoSliceFromCString(buf, size)
     n, err := conn.conn.Write(data)
-    //See http://code.google.com/p/go-wiki/wiki/cgo
     if err != nil && err != io.EOF {
-        //return Error to openssl
-        C.ERR_put_error(library_code, 0, 0, C.CString("gossl/bio.go"), 37)
-        C.go_conn_put_error(C.CString(fmt.Sprintf("%s", err)))
+        //We expect either a syscall error
+        //or a netOp error wrapping a syscall error
+    TESTERR:
+        switch err.(type) {
+        case syscall.Errno:
+            C.set_errno(C.int(err.(syscall.Errno)))
+        case *net.OpError:
+            err = err.(*net.OpError).Err
+            break TESTERR
+        }
         return C.int(-1)
     }
     return C.int(n)
@@ -32,16 +41,24 @@ func go_conn_bio_write(bio *C.BIO, buf *C.char, num C.int) C.int {
 
 //export go_conn_bio_read
 func go_conn_bio_read(bio *C.BIO, buf *C.char, num C.int) C.int {
-    var conn *Conn = (*Conn)(C.BIO_get_ex_data(bio, 0))
+    var conn *Conn = (*Conn)(bio.ptr)
     var size int = int(num)
     data := GoSliceFromCString(buf, size)
     n, err := conn.conn.Read(data)
     if err != nil && err != io.EOF {
-        fmt.Println(err)
-        //return Error to openssl
-        C.ERR_put_error(library_code, 0, 0, C.CString("gossl/bio.go"), 51)
-        C.go_conn_put_error(C.CString(fmt.Sprintf("%s", err)))
+        //We expect either a syscall error
+        //or a netOp error wrapping a syscall error
+    TESTERR:
+        switch err.(type) {
+        case syscall.Errno:
+            C.set_errno(C.int(err.(syscall.Errno)))
+        case *net.OpError:
+            err = err.(*net.OpError).Err
+            break TESTERR
+        }
         return C.int(-1)
+    } else if err == io.ErrUnexpectedEOF {
+        return 0
     }
     return C.int(n)
 }
@@ -53,13 +70,20 @@ func go_conn_bio_new(bio *C.BIO) C.int {
     //see mem_new()
     bio.num = C.int(-1)
     bio.ptr = nil
-    bio.flags = C.BIO_FLAGS_UPLINK
+    bio.flags = C.BIO_FLAGS_READ | C.BIO_FLAGS_WRITE
     return C.int(1)
 }
 
 //export go_conn_bio_free
 func go_conn_bio_free(bio *C.BIO) C.int {
-    return C.int(0)
+    var conn *Conn = (*Conn)(bio.ptr)
+    conn.conn.Close()
+    if C.int(bio.shutdown) != 0 {
+        bio.ptr = nil
+        bio.flags = 0
+        bio.init = 0
+    }
+    return C.int(1)
 }
 
 //export go_conn_bio_ctrl

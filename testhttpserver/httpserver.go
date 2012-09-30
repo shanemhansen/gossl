@@ -7,6 +7,11 @@ import "flag"
 import "github.com/shanemhansen/gossl"
 import "net/http"
 import cryptotls "crypto/tls"
+import "runtime/pprof"
+import "runtime"
+import "os"
+
+var _ = gossl.NewListener
 
 func main() {
     config := new(cryptotls.Config)
@@ -25,14 +30,33 @@ func main() {
     config.Certificates = certs
     l, err := net.Listen("tcp", ":8000")
     l, err = gossl.NewListener(l, config)
+    //l = cryptotls.NewListener(l, config)
     if err != nil {
         panic(err)
     }
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Hello, %q\n", html.EscapeString(r.URL.Path))
     })
-    for {
-        http.Serve(l, nil)
-    }
-    fmt.Println(err)
+    go func() {
+        msg := make([]byte, 100)
+        _, err := os.Stdin.Read(msg)
+        if err != nil {
+            panic(err)
+        }
+        f, err := os.OpenFile("./pprof", os.O_RDWR|os.O_CREATE, 0666)
+        if err != nil {
+            panic(err)
+        }
+        fmt.Println("heap")
+        runtime.GC()
+        err = pprof.WriteHeapProfile(f)
+        if err != nil {
+            panic(err)
+        }
+        fmt.Println("heap")
+        f.Close()
+
+    }()
+    http.Serve(l, nil)
+
 }

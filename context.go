@@ -3,13 +3,19 @@ package gossl
 /*
 #include "openssl/ssl.h"
 #include "openssl/err.h"
+extern int get_errno(void);
+
 */
 import "C"
 import "unsafe"
 import "github.com/shanemhansen/gossl/evp"
-import sslerr "github.com/shanemhansen/gossl/err"
+import "github.com/shanemhansen/gossl/sslerr"
 import "runtime"
+import "syscall"
 import "errors"
+import "fmt"
+
+var _ = fmt.Println
 
 type SSL struct {
     SSL *C.SSL
@@ -17,11 +23,10 @@ type SSL struct {
 
 func NewSSL(context *Context) *SSL {
     ssl := &SSL{C.SSL_new(context.Ctx)}
-    runtime.SetFinalizer(ssl, sslFree)
     return ssl
 }
 
-func sslFree(self *SSL) {
+func (self *SSL) Free() {
     C.SSL_free(self.SSL)
 }
 func (self *SSL) SetBIO(readbio *BIO, writebio *BIO) {
@@ -36,6 +41,7 @@ func (self *SSL) SetAcceptState() {
 func (self *SSL) Shutdown() error {
     //shutdown should happen in 2 steps
     //see http://www.openssl.org/docs/ssl/SSL_shutdown.html
+    defer self.Free()
     ret := C.SSL_shutdown(self.SSL)
     if int(ret) == 0 {
         ret = C.SSL_shutdown(self.SSL)
@@ -64,8 +70,17 @@ func (self *SSL) Write(b []byte) (int, error) {
 
 func (self *SSL) getError(ret C.int) error {
     err := C.SSL_get_error(self.SSL, ret)
-    if err != C.SSL_ERROR_NONE {
-        return errors.New(sslErrorMessage())
+    switch err {
+    case C.SSL_ERROR_NONE:
+    case C.SSL_ERROR_ZERO_RETURN:
+        return nil
+    case C.SSL_ERROR_SYSCALL:
+        if int(C.ERR_peek_error()) != 0 {
+            return syscall.Errno(C.get_errno())
+        }
+    default:
+        msg := sslerr.SSLErrorMessage()
+        return errors.New(msg)
     }
     return nil
 }
@@ -75,7 +90,12 @@ type Context struct {
 }
 
 func NewContext(method *METHOD) *Context {
-    return &Context{C.SSL_CTX_new(method.method)}
+    c := &Context{C.SSL_CTX_new(method.method)}
+    runtime.SetFinalizer(c, contextFree)
+    return c
+}
+func contextFree(self *Context) {
+    C.SSL_CTX_free(self.Ctx)
 }
 
 func (self *Context) UsePrivateKey(key *evp.PKey) error {

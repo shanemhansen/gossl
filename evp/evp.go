@@ -10,7 +10,7 @@ package evp
 import "C"
 import "unsafe"
 import "errors"
-import "github.com/shanemhansen/gossl/err"
+import "github.com/shanemhansen/gossl/sslerr"
 
 type PKey struct {
     PKey *C.EVP_PKEY
@@ -39,7 +39,7 @@ func LoadPrivateKeyPEM(buf []byte) (*PKey, error) {
 
     pkey := C.PEM_read_bio_PrivateKey(bio, nil, nil, nil)
     if pkey == nil {
-        return nil, errors.New(err.SSLErrorMessage())
+        return nil, errors.New(sslerr.SSLErrorMessage())
     }
     return &PKey{PKey: pkey}, nil
 }
@@ -51,7 +51,7 @@ func LoadPrivateKeyDER(buf []byte) (*PKey, error) {
 
     pkey := C.d2i_PrivateKey_bio(bio, nil)
     if pkey == nil {
-        return nil, errors.New(err.SSLErrorMessage())
+        return nil, errors.New(sslerr.SSLErrorMessage())
     }
     return &PKey{PKey: pkey}, nil
 }

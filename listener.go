@@ -9,6 +9,7 @@ package gossl
 import "C"
 import "errors"
 import "github.com/shanemhansen/gossl/evp"
+import "github.com/shanemhansen/gossl/sslerr"
 
 import "net"
 
@@ -35,12 +36,6 @@ type Listener struct {
     ctx    *Context
 }
 
-// Wrap a connection using an existing ssl context
-func Server(conn net.Conn, config *cryptotls.Config, ctx *Context) (c *Conn, err error) {
-    c, err = NewConn(&Conn{conn: conn, config: config, ctx: ctx})
-    return
-}
-
 // Accept a new connection and complete handshake.
 // TODO: do handshake later, this blocks future accepts.
 func (self *Listener) Accept() (net.Conn, error) {
@@ -48,11 +43,11 @@ func (self *Listener) Accept() (net.Conn, error) {
     if err != nil {
         return nil, err
     }
-    myconnection, err := Server(c, self.config, self.ctx)
+    myconnection, err := NewConn(self.ctx, self.config, c)
     //ssl_err := myconnection.Handshake()
     ssl_err := myconnection.Handshake()
     if ssl_err != nil {
-        return nil, errors.New("Handshake problem" + sslErrorMessage())
+        return nil, errors.New("Handshake problem" + sslerr.SSLErrorMessage())
     }
     return myconnection, nil
 }
@@ -76,14 +71,14 @@ func NewListenerFromContext(inner net.Listener) {
 }
 
 //Wrap an existing listener + crypto config and return a new TLS enabled listener.
-func NewListener(inner net.Listener, config *cryptotls.Config) (*Listener, error) {
+func NewListener(inner net.Listener, config *cryptotls.Config) (net.Listener, error) {
     l := new(Listener)
     l.Listener = inner
     l.config = config
     //FIXME hardcoded in method
     l.ctx = NewContext(SSLv23Method())
     if l.ctx == nil {
-        msg := sslErrorMessage()
+        msg := sslerr.SSLErrorMessage()
         return nil, errors.New("problem creating ssl context:\n" + msg)
     }
     //set certificates
@@ -97,7 +92,7 @@ func NewListener(inner net.Listener, config *cryptotls.Config) (*Listener, error
     //set the private key into the context
     err = l.ctx.UsePrivateKey(private_key)
     if err != nil {
-        return nil, errors.New("problem loading key " + sslErrorMessage())
+        return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage())
     }
     cert, err := ParseCertificate(config.Certificates[0].Certificate[0])
     if err != nil {
@@ -105,16 +100,16 @@ func NewListener(inner net.Listener, config *cryptotls.Config) (*Listener, error
     }
     err = l.ctx.UseCertificate(cert)
     if err != nil {
-        return nil, errors.New("problem loading key " + sslErrorMessage())
+        return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage())
     }
     //    if int(C.SSL_CTX_use_certificate(l.ctx.Ctx, (*C.X509)(unsafe.Pointer(cert.X509)))) != 1 {
-    //        return nil, errors.New("problem loading cert " + sslErrorMessage())
+    //        return nil, errors.New("problem loading cert " + sslerr.SSLErrorMessage())
     //    }
     return l, nil
 }
 
 //Listen on network, laddr and return a listener that will handle TLS connections.
-func Listen(network, laddr string, config *cryptotls.Config) (*Listener, error) {
+func Listen(network, laddr string, config *cryptotls.Config) (net.Listener, error) {
     if config == nil || len(config.Certificates) == 0 {
         return nil, errors.New("tls.Listen: no certificates in configuration")
     }

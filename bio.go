@@ -33,12 +33,19 @@ void go_conn_put_error(const char* p) {
 void clear_sys_error(void) {
  errno = 0;
 }
-
+void set_errno(int e) {
+ errno = e;
+}
+int get_errno(void) {
+ return errno;
+}
 */
 import "C"
 import "unsafe"
 
-//import "fmt"
+import "fmt"
+
+var _ = fmt.Println
 
 type BIO struct {
     BIO  *C.BIO
@@ -59,7 +66,8 @@ func newBIO(bio *C.BIO) *BIO {
 //error message is gotten be calling ssl.getError()
 func (self *BIO) Read(b []byte) int {
     C.clear_sys_error()
-    return int(C.BIO_read(self.BIO, unsafe.Pointer(&b[0]), C.int(len(b))))
+    ret := int(C.BIO_read(self.BIO, unsafe.Pointer(&b[0]), C.int(len(b))))
+    return ret
 }
 
 //See BIO_write
@@ -69,10 +77,10 @@ func (self *BIO) Write(b []byte) int {
     return ret
 }
 func (self *BIO) SetAppData(conn *Conn) {
-    C.BIO_set_ex_data(self.BIO, C.int(0), unsafe.Pointer(conn))
+    self.BIO.ptr = unsafe.Pointer(conn)
 }
 func (self *BIO) GetAppData() *Conn {
-    return self.conn
+    return (*Conn)(self.BIO.ptr)
 }
 func (self *BIO) Ctrl(cmd int, larg int, data unsafe.Pointer) int {
     return int(C.BIO_ctrl(self.BIO, C.int(cmd), C.long(larg), data))
