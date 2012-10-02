@@ -23,7 +23,7 @@ This is a standard go package, so you should be able to just:
     hashfile /etc/hosts
     hashstring 'something'
 
-    go install github.com/shanemhansen/testhttpserver
+    go install github.com/shanemhansen/gossl/examples/...
     
     testhttpserver -cert $somecert -key $somekey
 
