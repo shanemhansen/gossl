@@ -11,20 +11,33 @@ They should run as fast as an equivalant c program (sha256sum).
 Rationale
 =========
 
-You might ask, "why create another crypto library?". OpenSSL is well tested,
-well optimized code base. Benchmarks on my quad core i7 laptop show sha256
-to be about 5x faster using OpenSSL. Also, OpenSSL has hardware acceleration
-features (that aren't enabled yet) which would allow a go program to have
-hardware accelerated crypto. In my case, I run on a low power arm chip,
-so being able to transparently offload crypto to a dedicated crypto chip
-is a big win.
+You might ask, "why create another crypto library?".
+
+* Well audited and tested codebase.
+* Performance
+* Access to existing plugins/engines (cryptodev, gmp, af_alg)
+* More options for parsing exotic certificates and keys (including passphrase protected)
+* More ciphers and digests supported
+* OpenSSL provides more hooks (that we don't yet expose) for fine grained control of validation.
+* All TLS/SSL versions supported.
+* Works better with buggy clients/servers. (For example ab chokes on crypto/tls based servers)
+
+Unrationale
+===========
+
+* Requires CGO
+* Nowhere as elegant as crypto/tls
+* crypto/tls will probably catch up in terms of features and performance
+
 
 Roadmap
 =======
 
-Whatever I have time to do. I'd like to create a set of dropin replacements
-for the go crypto/* packages. Also, I want to enable support for ssl on
-go sockets, so go programs can take advantage of the performance of OpenSSL.
+Expose the complete OpenSSL api as well as making interoperability
+between crypto/tls and gossl possible. For example, you can use
+gossl to parse keys and certificates that crypto/tls can't handle yet.
+Connections are net.Conn's Listeners are net.Listener's, hashes and digests
+are... well you get the point.
 
 Instructions
 ============
@@ -32,7 +45,13 @@ Instructions
 Make sure you have libssl-dev and libssl1.0.0 installed on your system.
 This is needed to link against openssl.
 This is a standard go package, so you should be able to just:
-go install gossl/hashfile gossl/hashstring
 
-hashfile /etc/hosts
-hashstring 'something'
+    go install github.com/shanemhansen/gossl/examples/hashfile githum.com/shanemhansen/gossl/examples/hashstring
+
+    hashfile /etc/hosts
+    hashstring 'something'
+
+    go install github.com/shanemhansen/testhttpserver
+    
+    testhttpserver -cert $somecert -key $somekey
+

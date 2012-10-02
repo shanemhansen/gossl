@@ -3,6 +3,7 @@ package gossl
 /*
 #include "openssl/ssl.h"
 #include "openssl/err.h"
+#include "openssl/stack.h"
 extern int get_errno(void);
 
 */
@@ -11,79 +12,11 @@ import "unsafe"
 import "github.com/shanemhansen/gossl/evp"
 import "github.com/shanemhansen/gossl/sslerr"
 import "runtime"
-import "syscall"
 import "errors"
 import "fmt"
+import "time"
 
 var _ = fmt.Println
-
-type SSL struct {
-    SSL *C.SSL
-}
-
-func NewSSL(context *Context) *SSL {
-    ssl := &SSL{C.SSL_new(context.Ctx)}
-    return ssl
-}
-
-func (self *SSL) Free() {
-    C.SSL_free(self.SSL)
-}
-func (self *SSL) SetBIO(readbio *BIO, writebio *BIO) {
-    C.SSL_set_bio(self.SSL,
-        (*C.BIO)(unsafe.Pointer(readbio.BIO)),
-        (*C.BIO)(unsafe.Pointer(writebio.BIO)))
-    C.SSL_set_accept_state(self.SSL)
-}
-func (self *SSL) SetAcceptState() {
-    C.SSL_set_accept_state(self.SSL)
-}
-func (self *SSL) Shutdown() error {
-    //shutdown should happen in 2 steps
-    //see http://www.openssl.org/docs/ssl/SSL_shutdown.html
-    defer self.Free()
-    ret := C.SSL_shutdown(self.SSL)
-    if int(ret) == 0 {
-        ret = C.SSL_shutdown(self.SSL)
-        if int(ret) != 1 {
-            return self.getError(ret)
-        }
-
-    }
-    return nil
-
-}
-func (self *SSL) Handshake() error {
-    ret := C.SSL_do_handshake(self.SSL)
-    return self.getError(ret)
-}
-func (self *SSL) Read(b []byte) (int, error) {
-    length := len(b)
-    ret := C.SSL_read(self.SSL, unsafe.Pointer(&b[0]), C.int(length))
-    return length, self.getError(ret)
-}
-func (self *SSL) Write(b []byte) (int, error) {
-    length := len(b)
-    ret := C.SSL_write(self.SSL, unsafe.Pointer(&b[0]), C.int(length))
-    return length, self.getError(ret)
-}
-
-func (self *SSL) getError(ret C.int) error {
-    err := C.SSL_get_error(self.SSL, ret)
-    switch err {
-    case C.SSL_ERROR_NONE:
-    case C.SSL_ERROR_ZERO_RETURN:
-        return nil
-    case C.SSL_ERROR_SYSCALL:
-        if int(C.ERR_peek_error()) != 0 {
-            return syscall.Errno(C.get_errno())
-        }
-    default:
-        msg := sslerr.SSLErrorMessage()
-        return errors.New(msg)
-    }
-    return nil
-}
 
 type Context struct {
     Ctx *C.SSL_CTX
@@ -111,4 +44,130 @@ func (self *Context) UseCertificate(cert *Certificate) error {
         return errors.New("problem loading cert " + sslerr.SSLErrorMessage())
     }
     return nil
+}
+
+func (self *Context) UsePSKIdentityHint(hint string) int {
+    return int(C.SSL_CTX_use_psk_identity_hint(self.Ctx, C.CString(hint)))
+}
+func (self *Context) SetAppData(data unsafe.Pointer) {
+    C.SSL_CTX_set_ex_data(self.Ctx, 0, data)
+}
+func (self *Context) GetAppData() unsafe.Pointer {
+    return C.SSL_CTX_get_ex_data(self.Ctx, 0)
+}
+func (self *Context) Ctrl(op int, op2 int, data unsafe.Pointer) int {
+    return int(C.SSL_CTX_ctrl(self.Ctx, C.int(op), C.long(op2), data))
+}
+func (self *Context) SetCipherList(list string) int {
+    return int(C.SSL_CTX_set_cipher_list(self.Ctx, C.CString(list)))
+}
+func (self *Context) SetTimeout(t time.Time) {
+    C.SSL_CTX_set_timeout(self.Ctx, C.long(t.Unix()))
+}
+func (self *Context) GetTimeout() time.Time {
+    return time.Unix(int64(C.SSL_CTX_get_timeout(self.Ctx)), 0)
+}
+func (self *Context) GetCertStore() *X509Store {
+    return &X509Store{Store: C.SSL_CTX_get_cert_store(self.Ctx)}
+}
+func (self *Context) SetCertStore(store *X509Store) {
+    C.SSL_CTX_set_cert_store(self.Ctx, store.Store)
+}
+func (self *Context) FlushSessions(t time.Time) {
+    C.SSL_CTX_flush_sessions(self.Ctx, C.long(t.Unix()))
+}
+func (self *Context) UseRSAPrivateKeyFile(file string, filetype int) error {
+    ret := int(C.SSL_CTX_use_RSAPrivateKey_file(self.Ctx,
+        C.CString(file), C.int(filetype)))
+    if ret != 1 {
+        return errors.New(sslerr.SSLErrorMessage())
+    }
+    return nil
+
+}
+func (self *Context) UsePrivateKeyFile(file string, filetype int) error {
+    ret := int(C.SSL_CTX_use_PrivateKey_file(self.Ctx,
+        C.CString(file), C.int(filetype)))
+    if ret != 1 {
+        return errors.New(sslerr.SSLErrorMessage())
+    }
+    return nil
+
+}
+func (self *Context) UseCertificateFile(file string, filetype int) error {
+    ret := int(C.SSL_CTX_use_certificate_file(self.Ctx,
+        C.CString(file), C.int(filetype)))
+    if ret != 1 {
+        return errors.New(sslerr.SSLErrorMessage())
+    }
+    return nil
+}
+func (self *Context) UseCertificateChainFile(file string) error {
+    ret := int(C.SSL_CTX_use_certificate_chain_file(self.Ctx,
+        C.CString(file)))
+    if ret != 1 {
+        return errors.New(sslerr.SSLErrorMessage())
+    }
+    return nil
+}
+func (self *Context) SetVerify(mode int) {
+    //TODO allow people to customize this
+    C.SSL_CTX_set_verify(self.Ctx, C.int(mode), nil)
+}
+func (self *Context) SetVerifyDepth(depth int) {
+    C.SSL_CTX_set_verify_depth(self.Ctx, C.int(depth))
+}
+func (self *Context) CheckPrivateKey() error {
+    if int(C.SSL_CTX_check_private_key(self.Ctx)) != 1 {
+        return errors.New(sslerr.SSLErrorMessage())
+    }
+    return nil
+}
+func (self *Context) SetSessionIdContext(ctx []byte) {
+    C.SSL_CTX_set_session_id_context(self.Ctx,
+        (*C.uchar)(unsafe.Pointer(&ctx[0])),
+        C.uint(len(ctx)))
+}
+func (self *Context) SetPurpose(purpose int) int {
+    return int(C.SSL_CTX_set_purpose(self.Ctx, C.int(purpose)))
+}
+func (self *Context) SetTrust(trust int) int {
+    return int(C.SSL_CTX_set_trust(self.Ctx, C.int(trust)))
+}
+func (self *Context) SetClientCAList(names []X509Name) {
+    s := C.sk_new(nil)
+    for i := range names {
+        C.sk_push(s, unsafe.Pointer(names[i].Name))
+    }
+    //This could go crashy
+    //It's cutting through all the abstraction of SSL
+    //Stacks because they are all macro based.
+    C.SSL_CTX_set_client_CA_list(self.Ctx, (*C.struct_stack_st_X509_NAME)(unsafe.Pointer(s)))
+}
+func (self *Context) AddClientCA(cert *Certificate) int {
+    return int(C.SSL_CTX_add_client_CA(self.Ctx, cert.X509))
+}
+func (self *Context) SetQuietShutdown(mode int) {
+    C.SSL_CTX_set_quiet_shutdown(self.Ctx, C.int(mode))
+}
+func (self *Context) GetQuietShuwdown() int {
+    return int(C.SSL_CTX_get_quiet_shutdown(self.Ctx))
+}
+func (self *Context) SetDefaultVerifyPaths() int {
+    return int(C.SSL_CTX_set_default_verify_paths(self.Ctx))
+}
+func (self *Context) LoadVerifyLocations(cafile, capath *string) int {
+    if cafile != nil && capath != nil {
+        return int(C.SSL_CTX_load_verify_locations(self.Ctx,
+            C.CString(*cafile), C.CString(*capath)))
+    }
+    if cafile == nil {
+        return int(C.SSL_CTX_load_verify_locations(self.Ctx,
+            nil, C.CString(*capath)))
+    }
+    if capath == nil {
+        return int(C.SSL_CTX_load_verify_locations(self.Ctx,
+            C.CString(*cafile), nil))
+    }
+    return -1
 }

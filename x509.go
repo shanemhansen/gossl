@@ -12,6 +12,7 @@ package gossl
 #include <unistd.h>
 
 #include "openssl/x509.h"
+#include "openssl/x509_vfy.h"
 #include "openssl/bio.h"
 #include "openssl/pem.h"
 #cgo pkg-config: openssl
@@ -68,4 +69,29 @@ func ParseCertificate(asn1Data []byte) (*Certificate, error) {
     cert := new(Certificate)
     cert.X509 = sslCert
     return cert, nil
+}
+
+type X509Store struct {
+    Store *C.X509_STORE
+}
+
+func (self *X509Store) SetDepth(depth int) int {
+    return int(C.X509_STORE_set_depth(self.Store, C.int(depth)))
+}
+func (self *X509Store) AddCert(cert *Certificate) int {
+    return int(C.X509_STORE_add_cert(self.Store, cert.X509))
+}
+
+type X509Name struct {
+    Name *C.X509_NAME
+}
+
+func (self *X509Name) Print() ([]byte, error) {
+    bio := C.BIO_new(C.BIO_s_mem())
+    defer C.BIO_free(bio)
+    //TODO check for error here
+    C.X509_NAME_print_ex(bio, self.Name, 0, C.XN_FLAG_MULTILINE)
+    var temp *C.char
+    buf_len := C.BIO_ctrl(bio, C.BIO_CTRL_INFO, 0, unsafe.Pointer(&temp))
+    return C.GoBytes(unsafe.Pointer(temp), C.int(buf_len)), nil
 }

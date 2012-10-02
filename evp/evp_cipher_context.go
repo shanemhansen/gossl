@@ -1,4 +1,5 @@
 package evp
+
 /*
 #cgo pkg-config: openssl
 #include "openssl/evp.h"
@@ -7,13 +8,13 @@ import "C"
 import "unsafe"
 import "runtime"
 import "errors"
-import "fmt"
 
 type CipherCtx struct {
     evp_cipher_ctx *C.EVP_CIPHER_CTX
 }
+
 //initialize the cipher
-func NewCipherCtx() (*CipherCtx) {
+func NewCipherCtx() *CipherCtx {
     ctx := CipherCtx{new(C.EVP_CIPHER_CTX)}
     C.EVP_CIPHER_CTX_init(ctx.evp_cipher_ctx)
     ctx.SetPadding(0)
@@ -25,7 +26,7 @@ func CleanUpCipherCtx(self *CipherCtx) {
     //panic in a finalizer?
     C.EVP_CIPHER_CTX_cleanup(self.evp_cipher_ctx)
 }
-func (self *CipherCtx) EncryptInit(cipher *Cipher, key []byte, iv []byte) (error) {
+func (self *CipherCtx) EncryptInit(cipher *Cipher, key []byte, iv []byte) error {
     if cipher == nil {
         return errors.New("Cipher is required")
     }
@@ -49,7 +50,7 @@ func (self *CipherCtx) EncryptUpdate(out []byte, in []byte) (int, error) {
     if int(ret) != 1 {
         return int(outlen), errors.New("problem encrypting")
     }
-    
+
     return int(outlen), nil
 }
 func (self *CipherCtx) EncryptFinal(out []byte) (int, error) {
@@ -61,7 +62,7 @@ func (self *CipherCtx) EncryptFinal(out []byte) (int, error) {
     }
     return int(outlen), nil
 }
-func (self *CipherCtx) DecryptInit(cipher *Cipher, key []byte, iv []byte) (error) {
+func (self *CipherCtx) DecryptInit(cipher *Cipher, key []byte, iv []byte) error {
     key_p := (*C.uchar)(unsafe.Pointer(C.CString(string(key))))
     defer C.free(unsafe.Pointer(key_p))
     iv_p := (*C.uchar)(unsafe.Pointer(C.CString(string(iv))))
@@ -79,12 +80,11 @@ func (self *CipherCtx) DecryptUpdate(dst []byte, src []byte) (int, error) {
     var dstlen C.int
     srcbuf := (*C.uchar)(unsafe.Pointer(&src[0]))
     srclen := len(src)
-    fmt.Println(dstlen)
     ret := C.EVP_DecryptUpdate(self.evp_cipher_ctx, dstbuf, &dstlen, srcbuf, C.int(srclen))
     if int(ret) != 1 {
         return 0, errors.New("problem decrypting")
     }
-    
+
     return int(dstlen), nil
 }
 func (self *CipherCtx) DecryptFinal(out []byte) (int, error) {
@@ -96,26 +96,26 @@ func (self *CipherCtx) DecryptFinal(out []byte) (int, error) {
     }
     return int(outlen), nil
 }
-func (self *CipherCtx) nid() (int) {
+func (self *CipherCtx) nid() int {
     return int(C.EVP_CIPHER_CTX_nid(self.evp_cipher_ctx))
 }
-func (self *CipherCtx) name() (string) {
+func (self *CipherCtx) name() string {
     name_p := C.OBJ_nid2sn(C.int(self.nid()))
     return C.GoString(name_p)
 }
-func (self *CipherCtx) BlockSize() (int) {
+func (self *CipherCtx) BlockSize() int {
     return int(C.EVP_CIPHER_CTX_block_size(self.evp_cipher_ctx))
 }
-func (self *CipherCtx) KeyLength() (int) {
+func (self *CipherCtx) KeyLength() int {
     return int(C.EVP_CIPHER_CTX_key_length(self.evp_cipher_ctx))
 }
-func (self *CipherCtx) IVLength() (int) {
+func (self *CipherCtx) IVLength() int {
     return int(C.EVP_CIPHER_CTX_iv_length(self.evp_cipher_ctx))
 }
-func (self *CipherCtx) Cipher() (*Cipher) {
+func (self *CipherCtx) Cipher() *Cipher {
     return newCipher(C.EVP_CIPHER_CTX_cipher(self.evp_cipher_ctx))
 }
-func (self *CipherCtx) Type() (int) {
+func (self *CipherCtx) Type() int {
     return int(C.EVP_CIPHER_type(self.Cipher().evp_cipher))
 }
 func (self *CipherCtx) SetPadding(pad int) int {
