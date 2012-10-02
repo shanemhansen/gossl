@@ -16,6 +16,7 @@ func main() {
         return
     }
     ctx := gossl.NewContext(gossl.SSLv3Method())
+    ctx.SetOptions(gossl.OP_NO_COMPRESSION)
     err := ctx.UsePrivateKeyFile(*keypath, gossl.FILETYPE_PEM)
     if err != nil {
         panic(err)

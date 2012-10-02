@@ -49,6 +49,7 @@ func (self *Context) UseCertificate(cert *Certificate) error {
 func (self *Context) UsePSKIdentityHint(hint string) int {
     return int(C.SSL_CTX_use_psk_identity_hint(self.Ctx, C.CString(hint)))
 }
+
 func (self *Context) SetAppData(data unsafe.Pointer) {
     C.SSL_CTX_set_ex_data(self.Ctx, 0, data)
 }
@@ -84,6 +85,12 @@ func (self *Context) UseRSAPrivateKeyFile(file string, filetype int) error {
     }
     return nil
 
+}
+func (self *Context) SetOptions(options int) {
+    self.Ctrl(CTRL_OPTIONS, options, nil)
+}
+func (self *Context) GetOptions() int {
+    return int(self.Ctrl(CTRL_OPTIONS, 0, nil))
 }
 func (self *Context) UsePrivateKeyFile(file string, filetype int) error {
     ret := int(C.SSL_CTX_use_PrivateKey_file(self.Ctx,
