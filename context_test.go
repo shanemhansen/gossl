@@ -18,8 +18,7 @@ func TestContext(t *testing.T) {
     }
     c.SetVerify(VERIFY_NONE)
     c.SetVerify(9)
-    store := c.GetCertStore()
-    t.Fatal(store)
+    c.GetCertStore()
 }
 
 var key_pem = []byte(`-----BEGIN RSA PRIVATE KEY-----
