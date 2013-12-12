@@ -4,21 +4,22 @@ import "testing"
 import "github.com/shanemhansen/gossl/evp"
 
 func TestContext(t *testing.T) {
-    c := NewContext(SSLv3Method())
-    pkey, err := evp.LoadPrivateKeyPEM(key_pem)
-    cert, err := ParseCertificatePEM(cert_pem)
-    if err != nil {
-        t.Fatal(err)
-    }
-    c.UsePrivateKey(pkey)
-    c.UseCertificate(cert)
-    err = c.CheckPrivateKey()
-    if err != nil {
-        t.Fatal(err)
-    }
-    c.SetVerify(VERIFY_NONE)
-    c.SetVerify(9)
-    c.GetCertStore()
+	c := NewContext(SSLv3Method())
+	pkey, err := evp.LoadPrivateKeyPEM(key_pem)
+	cert, err := ParseCertificatePEM(cert_pem)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.UsePrivateKey(pkey)
+	c.UseCertificate(cert)
+	err = c.CheckPrivateKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.SetVerify(VERIFY_NONE)
+	c.SetVerify(9)
+	c.GetCertStore()
+	// FIXME these are not tested after being set
 }
 
 var key_pem = []byte(`-----BEGIN RSA PRIVATE KEY-----
