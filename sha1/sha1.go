@@ -51,6 +51,7 @@ func (self *SHA1Hash) Reset() {
 }
 func (self *SHA1Hash) Sum(b []byte) []byte {
 	digest := make([]C.uchar, self.Size())
+	// FIXME this frees the SHA_CTX, and breaks further Write's
 	if C.SHA1_Final(&digest[0], &self.sha) != 1 {
 		panic("couldn't finalize digest")
 	}

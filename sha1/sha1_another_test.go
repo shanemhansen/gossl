@@ -4,9 +4,10 @@
 
 // SHA1 hash algorithm.  See RFC 3174.
 
-package sha1
+package sha1_test
 
 import (
+	"."
 	"fmt"
 	"io"
 	"testing"
@@ -54,15 +55,17 @@ var golden = []sha1Test{
 func TestGolden(t *testing.T) {
 	for i := 0; i < len(golden); i++ {
 		g := golden[i]
-		s := fmt.Sprintf("%x", Sum([]byte(g.in)))
+		s := fmt.Sprintf("%x", sha1.Sum([]byte(g.in)))
 		if s != g.out {
 			t.Fatalf("Sum function: sha1(%s) = %s want %s", g.in, s, g.out)
 		}
-		c := New()
+		c := sha1.New()
+		c.Reset()
 		for j := 0; j < 3; j++ {
 			if j < 2 {
 				io.WriteString(c, g.in)
 			} else {
+				// Testing subsequent writes
 				io.WriteString(c, g.in[0:len(g.in)/2])
 				c.Sum(nil)
 				io.WriteString(c, g.in[len(g.in)/2:])
@@ -76,7 +79,7 @@ func TestGolden(t *testing.T) {
 	}
 }
 
-var bench = New()
+var bench = sha1.New()
 var buf = make([]byte, 8192)
 
 func benchmarkSize(b *testing.B, size int) {
