@@ -52,7 +52,11 @@ func (self *SHA224Hash) Reset() {
 }
 func (self *SHA224Hash) Sum(b []byte) []byte {
 	digest := make([]C.uchar, self.Size())
-	if C.SHA224_Final(&digest[0], &self.sha) != 1 {
+	// make a copy of the pointer, so our context does not get freed.
+	// this allows further writes.
+	// TODO perhaps we should think about runtime.SetFinalizer to free the context?
+	s_tmp := C.SHA256_CTX(self.sha)
+	if C.SHA224_Final(&digest[0], &s_tmp) != 1 {
 		panic("couldn't finalize digest")
 	}
 	var result []byte
@@ -70,8 +74,8 @@ func (self *SHA224Hash) Sum(b []byte) []byte {
 	return result
 }
 
-// Sum224 returns the SHA224 checksum of the data.                              
-func Sum224(data []byte) (sum224 [Size224]byte) {                               
+// Sum224 returns the SHA224 checksum of the data.
+func Sum224(data []byte) (sum224 [Size224]byte) {
 	h := New224()
 	h.Write(data)
 	var cs [Size224]byte
