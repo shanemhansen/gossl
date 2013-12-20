@@ -66,3 +66,12 @@ func (self *SHA256Hash) Sum(b []byte) []byte {
     }
     return result
 }
+
+// Sum256 returns the SHA256 checksum of the data.                              
+func Sum256(data []byte) [Size]byte {
+	h := New()
+	h.Write(data)
+	var cs [Size]byte
+	copy(cs[:], h.Sum(nil))
+	return cs
+}
