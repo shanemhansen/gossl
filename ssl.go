@@ -9,7 +9,7 @@ extern int get_errno(void);
 import "C"
 import "unsafe"
 import "syscall"
-import "github.com/shanemhansen/gossl/sslerr"
+import "./sslerr"
 import "errors"
 
 type SSL struct {

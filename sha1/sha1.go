@@ -8,8 +8,6 @@ package sha1
 
 #include "openssl/sha.h"
 #cgo pkg-config: openssl
-
-
 */
 import "C"
 import "unsafe"
@@ -52,11 +50,11 @@ func (self *SHA1Hash) Reset() {
 func (self *SHA1Hash) Sum(b []byte) []byte {
 	digest := make([]C.uchar, self.Size())
 	// make a copy of the pointer, so our context does not get freed.
-  // this allows further writes.
-  // TODO perhaps we should think about runtime.SetFinalizer to free the context?
-  s_tmp := C.SHA_CTX(self.sha)
+	// this allows further writes.
+	// TODO perhaps we should think about runtime.SetFinalizer to free the context?
+	s_tmp := C.SHA_CTX(self.sha)
 	if C.SHA1_Final(&digest[0], &s_tmp) != 1 {
-    // TODO maybe not panic here?
+		// TODO maybe not panic here?
 		panic("couldn't finalize digest")
 	}
 	var result []byte

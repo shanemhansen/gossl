@@ -1,7 +1,7 @@
 package gossl
 
 import "testing"
-import "github.com/shanemhansen/gossl/evp"
+import "./evp"
 
 func TestContext(t *testing.T) {
 	c := NewContext(SSLv3Method())
