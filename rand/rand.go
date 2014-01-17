@@ -13,9 +13,10 @@ package rand
 */
 import "C"
 import (
-	"../sslerr"
+	//"../sslerr"
 	"errors"
 	"io"
+	"unsafe"
 )
 
 func init() {
@@ -30,7 +31,15 @@ type reader struct {
 }
 
 func (r *reader) Read(p []byte) (n int, err error) {
-	return
+	var buf *C.uchar = (*C.uchar)(C.malloc(C.size_t(len(p))))
+	defer C.free(unsafe.Pointer(buf))
+
+	if C.RAND_bytes(buf, 255) == 1 {
+		copy(p, C.GoBytes(unsafe.Pointer(buf), C.int(len(p))))
+		return len(p), nil
+	}
+	return 0, errors.New("farts") // TODO read the error from SSL
+	//errors.New(sslerr.SSLErrorMessage())
 }
 
 func defaultRandSeedFile() string {
@@ -40,10 +49,6 @@ func defaultRandSeedFile() string {
 }
 
 func Read(b []byte) (n int, err error) {
-	buf := make([]C.uchar, len(b))
-	ret := C.RAND_bytes(buf, len(buf))
-	if ret != 1 {
-		errors.New(sslerr.SSLErrorMessage())
-	}
-	return nil
+	r := reader{}
+	return r.Read(b)
 }

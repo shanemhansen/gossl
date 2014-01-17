@@ -7,14 +7,9 @@ package rand
 import (
 	"bytes"
 	"compress/flate"
-	"fmt"
 	"io"
 	"testing"
 )
-
-func TestThings(t *testing.T) {
-	fmt.Println(defaultRandSeedFile())
-}
 
 func TestRead(t *testing.T) {
 	var n int = 4e6
