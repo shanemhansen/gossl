@@ -1,5 +1,6 @@
 // +build darwin dragonfly freebsd linux netbsd openbsd plan9 solaris
 
+// Package rand implements a cryptographically secure pseudorandom number generator.
 package rand
 
 /*
@@ -31,11 +32,14 @@ type reader struct {
 }
 
 func (r *reader) Read(p []byte) (n int, err error) {
-	var buf *C.uchar = (*C.uchar)(C.malloc(C.size_t(len(p))))
+	var (
+		p_len          = len(p)
+		buf   *C.uchar = (*C.uchar)(C.malloc(C.size_t(p_len)))
+	)
 	defer C.free(unsafe.Pointer(buf))
 
-	if C.RAND_bytes(buf, 255) == 1 {
-		copy(p, C.GoBytes(unsafe.Pointer(buf), C.int(len(p))))
+	if C.RAND_bytes(buf, C.int(p_len)) == 1 {
+		copy(p, C.GoBytes(unsafe.Pointer(buf), C.int(p_len)))
 		return len(p), nil
 	}
 	return 0, errors.New("farts") // TODO read the error from SSL
@@ -48,6 +52,10 @@ func defaultRandSeedFile() string {
 	return C.GoString(path)
 }
 
+/*
+Read is a helper function that calls Reader.Read using io.ReadFull.
+On return, n == len(b) if and only if err == nil.
+*/
 func Read(b []byte) (n int, err error) {
 	r := reader{}
 	return r.Read(b)

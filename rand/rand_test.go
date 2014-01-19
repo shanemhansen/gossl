@@ -18,7 +18,7 @@ func TestRead(t *testing.T) {
 	}
 	b := make([]byte, n)
 	n, err := io.ReadFull(Reader, b)
-	t.Fatalf("%d", len(b))
+	//t.Fatalf("%d", len(b))
 	if n != len(b) || err != nil {
 		t.Fatalf("ReadFull(buf) = %d, %s", n, err)
 	}
