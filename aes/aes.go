@@ -30,6 +30,7 @@ var (
 )
 
 //Construct a new instance. see crypto/aes
+// returning a block cipher that satisfies the crypto/cipher.Block interface
 func NewCipher(key []byte) (cipher.Block, error) {
 	aes := new(AESKey)
 	key_p := pointerFromBytes(key)
