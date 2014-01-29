@@ -24,11 +24,11 @@ type SHA1Hash struct {
 
 // New returns a new sha1 hash.Hash
 func New() hash.Hash {
-	hash := new(SHA1Hash)
-	if C.SHA1_Init(&hash.sha) != 1 {
+	h := new(SHA1Hash)
+	if C.SHA1_Init(&h.sha) != 1 {
 		panic("problem creating hash")
 	}
-	return hash
+	return h
 }
 
 func (self *SHA1Hash) Write(msg []byte) (n int, err error) {
