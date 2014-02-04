@@ -14,7 +14,7 @@ package rand
 */
 import "C"
 import (
-	//"../sslerr"
+	"../sslerr"
 	"errors"
 	"io"
 	"unsafe"
@@ -42,8 +42,8 @@ func (r *reader) Read(p []byte) (n int, err error) {
 		copy(p, C.GoBytes(unsafe.Pointer(buf), C.int(p_len)))
 		return len(p), nil
 	}
-	return 0, errors.New("farts") // TODO read the error from SSL
-	//errors.New(sslerr.SSLErrorMessage())
+	//return 0, errors.New("farts") // TODO read the error from SSL
+	return 0, errors.New(sslerr.SSLErrorMessage())
 }
 
 func defaultRandSeedFile() string {

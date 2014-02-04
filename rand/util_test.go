@@ -5,7 +5,7 @@
 package rand_test
 
 import (
-	"crypto/rand"
+	rand "."
 	"testing"
 )
 
