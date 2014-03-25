@@ -23,12 +23,12 @@ Kk6LtCVglz5jTPQTU73wZM8jSFQP1UtfKuPHnj3VL/gcaZDD6yZi4AEFrYvkSZv6
 -----END CERTIFICATE-----`
 
 func TestParseCertificate(t *testing.T) {
-    cert, err := ParseCertificatePEM([]byte(encoded_cert))
-    if err != nil {
-        t.Fatal("couldn't parse cert")
-    }
-    _, err = cert.DumpDERCertificate()
-    if err != nil {
-        t.Fatal("couldn't serialize cert")
-    }
+	cert, err := ParseCertificatePEM([]byte(encoded_cert))
+	if err != nil {
+		t.Fatal("couldn't parse cert")
+	}
+	_, err = cert.DumpDERCertificate()
+	if err != nil {
+		t.Fatal("couldn't serialize cert")
+	}
 }
