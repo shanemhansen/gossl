@@ -9,8 +9,8 @@ extern int get_errno(void);
 */
 import "C"
 import "unsafe"
-import "./evp"
-import "./sslerr"
+import "github.com/shanemhansen/gossl/evp"
+import "github.com/shanemhansen/gossl/sslerr"
 import "runtime"
 import "errors"
 import "fmt"

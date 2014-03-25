@@ -22,7 +22,7 @@ package gossl
 import "C"
 import "unsafe"
 import "errors"
-import "./sslerr"
+import "github.com/shanemhansen/gossl/sslerr"
 
 //A wrapper around OpenSSL's X509
 type Certificate struct {

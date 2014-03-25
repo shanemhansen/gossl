@@ -107,8 +107,7 @@ const (
 
 	CTRL_GET_EXTRA_CHAIN_CERTS   = 82
 	CTRL_CLEAR_EXTRA_CHAIN_CERTS = 83
-	VERIFY_NONE                  = 0x00
-	VERIFY_PEER                  = 0x01
-	VERIFY_FAIL_IF_NO_PEER_CERT  = 0x02
-	VERIFY_CLIENT_ONCE           = 0x04
+	OP_NO_COMPRESSION            = 0x00020000
+	FILETYPE_ASN1                = 2
+	FILETYPE_PEM                 = 1
 )

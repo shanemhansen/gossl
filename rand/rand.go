@@ -14,8 +14,8 @@ package rand
 */
 import "C"
 import (
-	"../sslerr"
 	"errors"
+	"github.com/shanemhansen/gossl/sslerr"
 	"io"
 	"unsafe"
 )
