@@ -7,6 +7,7 @@ extern int get_errno(void);
 
 */
 import "C"
+import "io"
 import "unsafe"
 import "syscall"
 import "github.com/shanemhansen/gossl/sslerr"
