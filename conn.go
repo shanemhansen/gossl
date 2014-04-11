@@ -24,14 +24,37 @@ type Conn struct {
 func (self *Conn) Conn() net.Conn {
 	return self.conn
 }
-func NewConn(ctx *Context, conn net.Conn) (*Conn, error) {
+
+// basic connection, must call either NewServerConn or NewClientConn
+func newConn(ctx *Context, conn net.Conn) (*Conn, error) {
 	self := &Conn{ssl: NewSSL(ctx),
 		bio:  NewBIO(BIOConn()),
 		conn: conn}
 	self.bio.SetAppData(self)
 	self.ssl.SetBIO(self.bio, self.bio)
-	self.ssl.SetAcceptState()
 	return self, nil
+}
+
+// create a new server connection
+func NewServerConn(ctx *Context, conn net.Conn) (*Conn, error) {
+	sslConn, err := newConn(ctx, conn)
+	if err != nil {
+		return nil, err
+	}
+
+	sslConn.ssl.SetAcceptState()
+	return sslConn, nil
+}
+
+// create a new client connection
+func NewClientConn(ctx *Context, conn net.Conn) (*Conn, error) {
+	sslConn, err := newConn(ctx, conn)
+	if err != nil {
+		return nil, err
+	}
+
+	sslConn.ssl.SetConnectState()
+	return sslConn, nil
 }
 func (self *Conn) Close() error {
 	return self.ssl.Shutdown()
