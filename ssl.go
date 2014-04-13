@@ -29,11 +29,14 @@ func (self *SSL) SetBIO(readbio *BIO, writebio *BIO) {
 	C.SSL_set_bio(self.SSL,
 		(*C.BIO)(unsafe.Pointer(readbio.BIO)),
 		(*C.BIO)(unsafe.Pointer(writebio.BIO)))
-	C.SSL_set_accept_state(self.SSL)
 }
 func (self *SSL) SetAcceptState() {
 	C.SSL_set_accept_state(self.SSL)
 }
+func (self *SSL) SetConnectState() {
+	C.SSL_set_connect_state(self.SSL)
+}
+
 func (self *SSL) Shutdown() error {
 	//shutdown should happen in 2 steps
 	//see http://www.openssl.org/docs/ssl/SSL_shutdown.html

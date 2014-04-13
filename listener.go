@@ -33,7 +33,7 @@ func (self *Listener) Accept() (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	myconnection, err := NewConn(self.Context, c)
+	myconnection, err := NewServerConn(self.Context, c)
 	//ssl_err := myconnection.Handshake()
 	return myconnection, nil
 }
