@@ -7,6 +7,7 @@ extern int get_errno(void);
 
 */
 import "C"
+import "io"
 import "unsafe"
 import "syscall"
 import "github.com/shanemhansen/gossl/sslerr"
@@ -55,19 +56,28 @@ func (self *SSL) Handshake() error {
 func (self *SSL) Read(b []byte) (int, error) {
 	length := len(b)
 	ret := C.SSL_read(self.SSL, unsafe.Pointer(&b[0]), C.int(length))
-	return length, self.getError(ret)
+	if err := self.getError(ret); err != nil {
+		return 0, err
+	}
+
+	return int(ret), nil
 }
 func (self *SSL) Write(b []byte) (int, error) {
 	length := len(b)
 	ret := C.SSL_write(self.SSL, unsafe.Pointer(&b[0]), C.int(length))
-	return length, self.getError(ret)
+	if err := self.getError(ret); err != nil {
+		return 0, err
+	}
+
+	return int(ret), nil
 }
 func (self *SSL) getError(ret C.int) error {
 	err := C.SSL_get_error(self.SSL, ret)
 	switch err {
 	case C.SSL_ERROR_NONE:
-	case C.SSL_ERROR_ZERO_RETURN:
 		return nil
+	case C.SSL_ERROR_ZERO_RETURN:
+		return io.EOF
 	case C.SSL_ERROR_SYSCALL:
 		if int(C.ERR_peek_error()) != 0 {
 			return syscall.Errno(C.get_errno())
