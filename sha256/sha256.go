@@ -14,50 +14,55 @@ package sha256
 
 */
 import "C"
-import "unsafe"
-import "hash"
+import (
+	"github.com/vbatts/gossl/sslerr"
+	"hash"
+	"unsafe"
+)
 
 const BlockSize = 64
 const Size = 32
 
-// SHA256Hash is a wrapper around OpenSSL's SHA256_CTX
-type SHA256Hash struct {
-	sha C.SHA256_CTX
+// sha256Hash is a wrapper around OpenSSL's SHA256_CTX
+type sha256Hash struct {
+	ctx C.SHA256_CTX
 }
 
 // New returns a new sha256 hash.Hash
+// if the returned hash is empty, then make a call to sslerr.Error()
 func New() hash.Hash {
-	hash := new(SHA256Hash)
-	if C.SHA256_Init(&hash.sha) != 1 {
-		panic("problem creating hash")
+	h := new(sha256Hash)
+	if C.SHA256_Init(&h.ctx) != 1 {
+		return nil
 	}
-	return hash
+	return h
 }
 
-func (self *SHA256Hash) Write(msg []byte) (n int, err error) {
+func (h *sha256Hash) Write(msg []byte) (n int, err error) {
 	size := C.size_t(len(msg))
-	if C.SHA256_Update(&self.sha, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
-		panic("problem updating hash")
+	if C.SHA256_Update(&h.ctx, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
+		return len(msg), sslerr.Error()
 	}
 	return len(msg), nil
 }
-func (self *SHA256Hash) BlockSize() int {
+func (h *sha256Hash) BlockSize() int {
 	return C.SHA256_DIGEST_LENGTH
 }
-func (self *SHA256Hash) Size() int {
+func (h *sha256Hash) Size() int {
 	return C.SHA256_DIGEST_LENGTH
 }
-func (self *SHA256Hash) Reset() {
-	C.SHA256_Init(&self.sha)
+func (h *sha256Hash) Reset() {
+	C.SHA256_Init(&h.ctx)
 }
-func (self *SHA256Hash) Sum(b []byte) []byte {
-	digest := make([]C.uchar, self.Size())
+
+// if the returned array is empty, then make a call to sslerr.Error()
+func (h *sha256Hash) Sum(b []byte) []byte {
+	digest := make([]C.uchar, h.Size())
 	// make a copy of the pointer, so our context does not get freed.
 	// this allows further writes.
-	// TODO perhaps we should think about runtime.SetFinalizer to free the context?
-	s_tmp := C.SHA256_CTX(self.sha)
+	s_tmp := C.SHA256_CTX(h.ctx)
 	if C.SHA256_Final(&digest[0], &s_tmp) != 1 {
-		panic("couldn't finalize digest")
+		return []byte{}
 	}
 	var result []byte
 	if b != nil {
