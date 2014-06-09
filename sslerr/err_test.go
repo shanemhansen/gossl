@@ -14,7 +14,7 @@ func TestNone(t *testing.T) {
 		t.Errorf("expected [], but got [%s]", msg)
 	}
 
-  str := SSLErrorMessage()
+	str := SSLErrorMessage()
 	if str != "" {
 		t.Errorf("expected [], but got [%s]", str)
 	}

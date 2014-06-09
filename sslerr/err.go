@@ -2,6 +2,7 @@ package sslerr
 
 /*
 #include "openssl/ssl.h"
+#include "openssl/conf.h"
 #include "openssl/err.h"
 #cgo pkg-config: openssl
 
@@ -14,6 +15,30 @@ var sslFmtString = "%s:%s:%s\n"
 
 type errCode C.ulong
 
+var inited bool = false
+
+func init() {
+	Init()
+}
+
+// OpenSSL loading
+func Init() {
+	if !inited {
+		C.ERR_load_ERR_strings()
+		C.ERR_load_crypto_strings()
+		C.OPENSSL_config(nil)
+	}
+	inited = true
+}
+
+// OpenSSL cleanup and freeing
+func Cleanup() {
+	if inited {
+		C.ERR_free_strings()
+	}
+	inited = false
+}
+
 func SSLErrorMessage() string {
 	msg := ""
 	for {
@@ -23,6 +48,7 @@ func SSLErrorMessage() string {
 		}
 		msg += get_error_string(errCode(err_code))
 	}
+	C.ERR_clear_error()
 	return msg
 }
 
