@@ -1,5 +1,6 @@
 //holds some useful constants
 package nid
+
 // So openssl has a bunch of constants for "objects" like hashes and ciphers
 // this list should be fairly up to date for openssl 1.0
 var NID_undef int = 0
