@@ -15,7 +15,7 @@ package sha256
 */
 import "C"
 import (
-	"github.com/vbatts/gossl/sslerr"
+	"github.com/shanemhansen/gossl/sslerr"
 	"hash"
 	"unsafe"
 )

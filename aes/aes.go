@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/vbatts/gossl/sslerr"
+	"github.com/shanemhansen/gossl/sslerr"
 )
 
 const BlockSize = 16
