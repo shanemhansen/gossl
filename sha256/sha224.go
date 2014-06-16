@@ -14,50 +14,55 @@ package sha256
 
 */
 import "C"
-import "unsafe"
-import "hash"
+import (
+	"github.com/shanemhansen/gossl/sslerr"
+	"hash"
+	"unsafe"
+)
 
 // The size of the SHA224 hash digest
 const Size224 = 28
 
-// SHA224Hash is a wrapper around OpenSSL's SHA256_CTX (that's not a typo)
-type SHA224Hash struct {
-	sha C.SHA256_CTX
+// sha224Hash is a wrapper around OpenSSL's SHA256_CTX (that's not a typo)
+type sha224Hash struct {
+	ctx C.SHA256_CTX
 }
 
 // New returns a new sha224 hash.Hash
+// if the returned hash is empty, then make a call to sslerr.Error()
 func New224() hash.Hash {
-	hash := new(SHA224Hash)
-	if C.SHA224_Init(&hash.sha) != 1 {
-		panic("problem creating hash")
+	hash := new(sha224Hash)
+	if C.SHA224_Init(&hash.ctx) != 1 {
+		return nil
 	}
 	return hash
 }
 
-func (self *SHA224Hash) Write(msg []byte) (n int, err error) {
+func (h *sha224Hash) Write(msg []byte) (n int, err error) {
 	size := C.size_t(len(msg))
-	if C.SHA224_Update(&self.sha, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
-		panic("problem updating hash")
+	if C.SHA224_Update(&h.ctx, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
+		return len(msg), sslerr.Error()
 	}
 	return len(msg), nil
 }
-func (self *SHA224Hash) BlockSize() int {
+func (h *sha224Hash) BlockSize() int {
 	return C.SHA224_DIGEST_LENGTH
 }
-func (self *SHA224Hash) Size() int {
+func (h *sha224Hash) Size() int {
 	return C.SHA224_DIGEST_LENGTH
 }
-func (self *SHA224Hash) Reset() {
-	C.SHA224_Init(&self.sha)
+func (h *sha224Hash) Reset() {
+	C.SHA224_Init(&h.ctx)
 }
-func (self *SHA224Hash) Sum(b []byte) []byte {
-	digest := make([]C.uchar, self.Size())
+
+// if the returned array is empty, then make a call to sslerr.Error()
+func (h *sha224Hash) Sum(b []byte) []byte {
+	digest := make([]C.uchar, h.Size())
 	// make a copy of the pointer, so our context does not get freed.
 	// this allows further writes.
-	// TODO perhaps we should think about runtime.SetFinalizer to free the context?
-	s_tmp := C.SHA256_CTX(self.sha)
+	s_tmp := C.SHA256_CTX(h.ctx)
 	if C.SHA224_Final(&digest[0], &s_tmp) != 1 {
-		panic("couldn't finalize digest")
+		return []byte{}
 	}
 	var result []byte
 	if b != nil {

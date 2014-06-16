@@ -5,7 +5,7 @@
 package rand_test
 
 import (
-  rand "."
+	rand "."
 	"bytes"
 	"compress/flate"
 	"io"
