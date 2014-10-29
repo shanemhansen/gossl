@@ -62,7 +62,11 @@ func (self *SSL) Read(b []byte) (int, error) {
 	if err := self.getError(ret); err != nil {
 		return 0, err
 	}
-
+	// if there's no error, but a return value of 0
+	// let's say it's an EOF
+	if ret == 0 {
+		return 0, io.EOF
+	}
 	return int(ret), nil
 }
 func (self *SSL) Write(b []byte) (int, error) {
