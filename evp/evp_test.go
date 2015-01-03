@@ -8,12 +8,13 @@ func TestIt(t *testing.T) {
 	for index := range ciphers_to_test {
 		cipher := ciphers_to_test[index]
 		ctx := NewCipherCtx()
-		e := ctx.EncryptInit(CipherByName(cipher), make([]byte, 16), make([]byte, 8))
+		msg := "my name is shane"
+		e := ctx.EncryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
 		if e != nil {
-			t.Fatal("Cipher is required")
+			t.Fatalf("Cipher is required: %s", e)
 		}
-		out := make([]byte, 16*2) //we have to overallocate I guess
-		in := []byte("my name is shane")
+		out := make([]byte, len(msg)*2) //we have to overallocate I guess
+		in := []byte(msg)
 		n, err := ctx.EncryptUpdate(out, in)
 		if err != nil {
 			t.Fatal("error encrypting", err)
@@ -23,9 +24,13 @@ func TestIt(t *testing.T) {
 			t.Fatal("error encrypting", err)
 		}
 		out = out[:n+tmplength]
-		ctx.DecryptInit(CipherByName(cipher), make([]byte, 16), make([]byte, 8))
+		e = ctx.DecryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
+		if e != nil {
+			t.Fatalf("Cipher is required: %s", e)
+		}
+
 		in = out
-		out = make([]byte, 16*2)
+		out = make([]byte, len(msg)*2)
 		n1, err := ctx.DecryptUpdate(out, in)
 		if err != nil {
 			t.Fatal("error encrypting", err)
@@ -35,8 +40,8 @@ func TestIt(t *testing.T) {
 		if err != nil {
 			t.Fatal("error encrypting", err)
 		}
-		if string(out) != "my name is shane" {
-			t.Fatal("problem decrypting")
+		if string(out) != msg {
+			t.Errorf("problem decrypting with %q. Expected %q; got %q", cipher, msg, string(out))
 		}
 	}
 }
