@@ -9,9 +9,12 @@ package evp
 #include "openssl/bio.h"
 */
 import "C"
-import "unsafe"
-import "errors"
-import "github.com/shanemhansen/gossl/sslerr"
+import (
+	"errors"
+	"unsafe"
+
+	"github.com/shanemhansen/gossl/sslerr"
+)
 
 //Wrapper around OpenSSL's EVP_PKEY
 type PKey struct {
@@ -26,7 +29,7 @@ func (self *PKey) DumpPEM() ([]byte, error) {
 	}
 	ret := C.PEM_write_bio_PrivateKey(bio, self.PKey, nil, nil, 0, nil, nil)
 	if int(ret) == 0 {
-		return nil, errors.New(sslerr.SSLErrorMessage())
+		return nil, sslerr.Error()
 	}
 	var temp *C.char
 	buf_len := C.BIO_ctrl(bio, C.BIO_CTRL_INFO, C.long(0), unsafe.Pointer(&temp))
@@ -73,7 +76,7 @@ func LoadPrivateKeyDER(buf []byte) (*PKey, error) {
 
 	pkey := C.d2i_PrivateKey_bio(bio, nil)
 	if pkey == nil {
-		return nil, errors.New(sslerr.SSLErrorMessage())
+		return nil, sslerr.Error()
 	}
 	return &PKey{PKey: pkey}, nil
 }

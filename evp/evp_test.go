@@ -3,15 +3,14 @@ package evp
 import "testing"
 
 func TestIt(t *testing.T) {
-	OpenSSLAddAllCiphers()
 	ciphers_to_test := []string{"bf-ecb", "aes-128-ecb"}
 	for index := range ciphers_to_test {
 		cipher := ciphers_to_test[index]
 		ctx := NewCipherCtx()
 		msg := "my name is shane"
-		e := ctx.EncryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
-		if e != nil {
-			t.Fatalf("Cipher is required: %s", e)
+		err := ctx.EncryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
+		if err != nil {
+			t.Fatalf("Cipher is required: %s", err)
 		}
 		out := make([]byte, len(msg)*2) //we have to overallocate I guess
 		in := []byte(msg)
@@ -24,9 +23,9 @@ func TestIt(t *testing.T) {
 			t.Fatal("error encrypting", err)
 		}
 		out = out[:n+tmplength]
-		e = ctx.DecryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
-		if e != nil {
-			t.Fatalf("Cipher is required: %s", e)
+		err = ctx.DecryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
+		if err != nil {
+			t.Fatalf("Cipher is required: %s", err)
 		}
 
 		in = out
