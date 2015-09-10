@@ -3,17 +3,16 @@ package evp
 import "testing"
 
 func TestIt(t *testing.T) {
-	OpenSSLAddAllCiphers()
-	ciphers_to_test := []string{"bf-ecb", "aes-128-ecb"}
-	for index := range ciphers_to_test {
-		cipher := ciphers_to_test[index]
+	msg := "my name is shane"
+	for _, cipherName := range []string{"bf-ecb", "aes-128-ecb"} {
+		cipher := CipherByName(cipherName)
 		ctx := NewCipherCtx()
-		e := ctx.EncryptInit(CipherByName(cipher), make([]byte, 16), make([]byte, 8))
-		if e != nil {
-			t.Fatal("Cipher is required")
+		err := ctx.EncryptInit(cipher, make([]byte, len(msg)), make([]byte, cipher.IVLength()))
+		if err != nil {
+			t.Fatalf("Cipher is required: %s", err)
 		}
-		out := make([]byte, 16*2) //we have to overallocate I guess
-		in := []byte("my name is shane")
+		out := make([]byte, len(msg)*2) //we have to overallocate I guess
+		in := []byte(msg)
 		n, err := ctx.EncryptUpdate(out, in)
 		if err != nil {
 			t.Fatal("error encrypting", err)
@@ -23,9 +22,13 @@ func TestIt(t *testing.T) {
 			t.Fatal("error encrypting", err)
 		}
 		out = out[:n+tmplength]
-		ctx.DecryptInit(CipherByName(cipher), make([]byte, 16), make([]byte, 8))
+		err = ctx.DecryptInit(cipher, make([]byte, len(msg)), make([]byte, cipher.IVLength()))
+		if err != nil {
+			t.Fatalf("Cipher is required: %s", err)
+		}
+
 		in = out
-		out = make([]byte, 16*2)
+		out = make([]byte, len(msg)*2)
 		n1, err := ctx.DecryptUpdate(out, in)
 		if err != nil {
 			t.Fatal("error encrypting", err)
@@ -35,8 +38,8 @@ func TestIt(t *testing.T) {
 		if err != nil {
 			t.Fatal("error encrypting", err)
 		}
-		if string(out) != "my name is shane" {
-			t.Fatal("problem decrypting")
+		if string(out) != msg {
+			t.Errorf("problem decrypting with %q. Expected %q; got %q", cipherName, msg, string(out))
 		}
 	}
 }

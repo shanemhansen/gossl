@@ -3,49 +3,59 @@ package evp
 /*
 #cgo pkg-config: openssl
 #include "openssl/evp.h"
+
+// workaround their macros
+void my_add_add_algorithms(void) {
+	OpenSSL_add_all_algorithms();
+}
 */
 import "C"
 import "unsafe"
 
-var inited bool = false
-
 func init() {
-	if !inited {
-		OpenSSLAddAllCiphers()
-	}
-	inited = true
+	//OpenSSLAddAllCiphers()
+	//OpenSSLAddAllDigests()
+	OpenSSLAddAllAlgorithms()
 }
 
 type Cipher struct {
 	evp_cipher *C.EVP_CIPHER
 }
 
-func newCipher(self *C.EVP_CIPHER) *Cipher {
-	if self == nil {
+func newCipher(cipher *C.EVP_CIPHER) *Cipher {
+	if cipher == nil {
 		return nil
 	}
-	return &Cipher{self}
+	return &Cipher{cipher}
 }
-func (self *Cipher) Nid() int {
-	return int(C.EVP_CIPHER_nid(self.evp_cipher))
+func (cipher *Cipher) Nid() int {
+	return int(C.EVP_CIPHER_nid(cipher.evp_cipher))
 }
-func (self *Cipher) BlockSize() int {
-	return int(C.EVP_CIPHER_block_size(self.evp_cipher))
+func (cipher *Cipher) BlockSize() int {
+	return int(C.EVP_CIPHER_block_size(cipher.evp_cipher))
 }
-func (self *Cipher) KeyLength() int {
-	return int(C.EVP_CIPHER_key_length(self.evp_cipher))
+func (cipher *Cipher) KeyLength() int {
+	return int(C.EVP_CIPHER_key_length(cipher.evp_cipher))
 }
-func (self *Cipher) IVLength() int {
-	return int(C.EVP_CIPHER_iv_length(self.evp_cipher))
+func (cipher *Cipher) IVLength() int {
+	return int(C.EVP_CIPHER_iv_length(cipher.evp_cipher))
 }
 func CipherByName(name string) *Cipher {
 	name_p := C.CString(name)
 	defer C.free(unsafe.Pointer(name_p))
 	return newCipher(C.EVP_get_cipherbyname(name_p))
 }
+
 func CipherByNid(nid int) *Cipher {
 	return newCipher(C.EVP_get_cipherbyname(C.OBJ_nid2sn(C.int(nid))))
 }
+
 func OpenSSLAddAllCiphers() {
 	C.OpenSSL_add_all_ciphers()
+}
+func OpenSSLAddAllDigests() {
+	C.OpenSSL_add_all_digests()
+}
+func OpenSSLAddAllAlgorithms() {
+	C.my_add_add_algorithms()
 }
