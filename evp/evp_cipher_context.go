@@ -13,6 +13,10 @@ import (
 	"github.com/shanemhansen/gossl/sslerr"
 )
 
+func init() {
+	C.ERR_load_EVP_strings()
+}
+
 type CipherCtx struct {
 	evp_cipher_ctx *C.EVP_CIPHER_CTX
 }
@@ -76,7 +80,8 @@ func (ctx *CipherCtx) EncryptUpdate(out []byte, in []byte) (int, error) {
 	inlen := len(in)
 	ret := C.EVP_EncryptUpdate(ctx.evp_cipher_ctx, outbuf, &outlen, inbuf, C.int(inlen))
 	if int(ret) != 1 {
-		return int(outlen), ErrProblemEncrypting
+		//return int(outlen), ErrProblemEncrypting
+		return int(outlen), sslerr.Error()
 	}
 
 	return int(outlen), nil
@@ -86,7 +91,8 @@ func (ctx *CipherCtx) EncryptFinal(out []byte) (int, error) {
 	var outlen C.int
 	ret := C.EVP_EncryptFinal(ctx.evp_cipher_ctx, outbuf, &outlen)
 	if int(ret) != 1 {
-		return int(outlen), ErrProblemEncrypting
+		//return int(outlen), ErrProblemEncrypting
+		return int(outlen), sslerr.Error()
 	}
 	return int(outlen), nil
 }
@@ -98,10 +104,15 @@ func (ctx *CipherCtx) DecryptInit(cipher *Cipher, key []byte, iv []byte) error {
 
 	ret := int(C.EVP_DecryptInit(
 		ctx.evp_cipher_ctx, cipher.evp_cipher, key_p, iv_p))
-	if ret == 1 {
-		return nil
+	if ret != 1 {
+		// try to return the openssl error first, if present
+		if err := sslerr.Error(); err != nil {
+			return err
+		} else {
+			return ErrFailure
+		}
 	}
-	return ErrFailure
+	return nil
 }
 func (ctx *CipherCtx) DecryptUpdate(dst []byte, src []byte) (int, error) {
 	dstbuf := (*C.uchar)(unsafe.Pointer(&dst[0]))
@@ -110,7 +121,8 @@ func (ctx *CipherCtx) DecryptUpdate(dst []byte, src []byte) (int, error) {
 	srclen := len(src)
 	ret := C.EVP_DecryptUpdate(ctx.evp_cipher_ctx, dstbuf, &dstlen, srcbuf, C.int(srclen))
 	if int(ret) != 1 {
-		return 0, ErrProblemDecrypting
+		//return 0, ErrProblemDecrypting
+		return 0, sslerr.Error()
 	}
 
 	return int(dstlen), nil
@@ -120,7 +132,8 @@ func (ctx *CipherCtx) DecryptFinal(out []byte) (int, error) {
 	var outlen C.int
 	ret := C.EVP_DecryptFinal(ctx.evp_cipher_ctx, outbuf, &outlen)
 	if int(ret) != 1 {
-		return 0, ErrProblemDecrypting
+		//return 0, ErrProblemDecrypting
+		return 0, sslerr.Error()
 	}
 	return int(outlen), nil
 }

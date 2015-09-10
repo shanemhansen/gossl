@@ -16,6 +16,10 @@ import (
 	"github.com/shanemhansen/gossl/sslerr"
 )
 
+func init() {
+	C.ERR_load_EVP_strings()
+}
+
 //Wrapper around OpenSSL's EVP_PKEY
 type PKey struct {
 	PKey *C.EVP_PKEY

@@ -3,12 +3,11 @@ package evp
 import "testing"
 
 func TestIt(t *testing.T) {
-	ciphers_to_test := []string{"bf-ecb", "aes-128-ecb"}
-	for index := range ciphers_to_test {
-		cipher := ciphers_to_test[index]
+	msg := "my name is shane"
+	for _, cipherName := range []string{"bf-ecb", "aes-128-ecb"} {
+		cipher := CipherByName(cipherName)
 		ctx := NewCipherCtx()
-		msg := "my name is shane"
-		err := ctx.EncryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
+		err := ctx.EncryptInit(cipher, make([]byte, len(msg)), make([]byte, cipher.IVLength()))
 		if err != nil {
 			t.Fatalf("Cipher is required: %s", err)
 		}
@@ -23,7 +22,7 @@ func TestIt(t *testing.T) {
 			t.Fatal("error encrypting", err)
 		}
 		out = out[:n+tmplength]
-		err = ctx.DecryptInit(CipherByName(cipher), make([]byte, len(msg)), make([]byte, 8))
+		err = ctx.DecryptInit(cipher, make([]byte, len(msg)), make([]byte, cipher.IVLength()))
 		if err != nil {
 			t.Fatalf("Cipher is required: %s", err)
 		}
@@ -40,7 +39,7 @@ func TestIt(t *testing.T) {
 			t.Fatal("error encrypting", err)
 		}
 		if string(out) != msg {
-			t.Errorf("problem decrypting with %q. Expected %q; got %q", cipher, msg, string(out))
+			t.Errorf("problem decrypting with %q. Expected %q; got %q", cipherName, msg, string(out))
 		}
 	}
 }
