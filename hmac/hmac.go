@@ -79,7 +79,9 @@ func (hm *hmac) Write(msg []byte) (n int, err error) {
 func (hm *hmac) Sum(b []byte) []byte {
 	// store a copy to not lose it after each iteration
 	var hmTmp C.HMAC_CTX
-	C.HMAC_CTX_copy(&hmTmp, &hm.ctx)
+	if C.HMAC_CTX_copy(&hmTmp, &hm.ctx) != 1 {
+		return make([]byte, 0)
+	}
 
 	digest := make([]C.uchar, hm.Size())
 	rlen := len(digest)
