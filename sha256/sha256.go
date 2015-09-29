@@ -3,66 +3,104 @@
 package sha256
 
 /*
+#cgo pkg-config: openssl
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #include "openssl/sha.h"
-#cgo pkg-config: openssl
-
-
 */
 import "C"
 import (
-	"github.com/shanemhansen/gossl/sslerr"
 	"hash"
 	"unsafe"
+
+	"github.com/shanemhansen/gossl/sslerr"
 )
 
-const BlockSize = 64
-const Size = 32
+const (
+	// The size of a SHA256 checksum in bytes.
+	Size = C.SHA256_DIGEST_LENGTH
 
-// sha256Hash is a wrapper around OpenSSL's SHA256_CTX
-type sha256Hash struct {
-	ctx C.SHA256_CTX
+	// The size of a SHA224 checksum in bytes.
+	Size224 = C.SHA224_DIGEST_LENGTH
+
+	// The blocksize of SHA256 and SHA224 in bytes.
+	BlockSize = 64
+)
+
+// digest is a wrapper around OpenSSL's SHA256_CTX
+type digest struct {
+	ctx   C.SHA256_CTX
+	is224 bool
+}
+
+func (d *digest) Reset() {
+	if d.is224 {
+		C.SHA224_Init(&d.ctx)
+		return
+	}
+	C.SHA256_Init(&d.ctx)
 }
 
 // New returns a new sha256 hash.Hash
 // if the returned hash is empty, then make a call to sslerr.Error()
 func New() hash.Hash {
-	h := new(sha256Hash)
-	if C.SHA256_Init(&h.ctx) != 1 {
+	d := new(digest)
+	if C.SHA256_Init(&d.ctx) != 1 {
 		return nil
 	}
-	return h
+	return d
 }
 
-func (h *sha256Hash) Write(msg []byte) (n int, err error) {
-	size := C.size_t(len(msg))
-	if C.SHA256_Update(&h.ctx, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
-		return len(msg), sslerr.Error()
+func New224() hash.Hash {
+	d := new(digest)
+	d.is224 = true
+	if C.SHA224_Init(&d.ctx) != 1 {
+		return nil
 	}
-	return len(msg), nil
+	return d
 }
-func (h *sha256Hash) BlockSize() int {
-	return C.SHA256_DIGEST_LENGTH
+
+func (d *digest) Size() int {
+	if d.is224 {
+		return Size224
+	}
+	return Size
 }
-func (h *sha256Hash) Size() int {
-	return C.SHA256_DIGEST_LENGTH
-}
-func (h *sha256Hash) Reset() {
-	C.SHA256_Init(&h.ctx)
+
+func (d *digest) BlockSize() int { return BlockSize }
+
+func (d *digest) Write(msg []byte) (n int, err error) {
+	mlen := len(msg)
+	size := C.size_t(mlen)
+	if d.is224 {
+		if C.SHA224_Update(&d.ctx, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
+			return 0, sslerr.Error()
+		}
+		return mlen, nil
+	}
+	if C.SHA256_Update(&d.ctx, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
+		return 0, sslerr.Error()
+	}
+	return mlen, nil
 }
 
 // if the returned array is empty, then make a call to sslerr.Error()
-func (h *sha256Hash) Sum(b []byte) []byte {
-	digest := make([]C.uchar, h.Size())
+func (d *digest) Sum(b []byte) []byte {
+	buf := make([]C.uchar, d.Size())
 	// make a copy of the pointer, so our context does not get freed.
 	// this allows further writes.
-	s_tmp := C.SHA256_CTX(h.ctx)
-	if C.SHA256_Final(&digest[0], &s_tmp) != 1 {
-		return []byte{}
+	ctxTmp := C.SHA256_CTX(d.ctx)
+	if d.is224 {
+		if C.SHA224_Final(&buf[0], &ctxTmp) != 1 {
+			return make([]byte, 0)
+		}
+	} else {
+		if C.SHA256_Final(&buf[0], &ctxTmp) != 1 {
+			return make([]byte, 0)
+		}
 	}
 	var result []byte
 	if b != nil {
@@ -70,17 +108,26 @@ func (h *sha256Hash) Sum(b []byte) []byte {
 	} else {
 		result = b
 	}
-	for _, value := range digest {
+	for _, value := range buf {
 		result = append(result, byte(value))
 	}
 	return result
 }
 
 // Sum256 returns the SHA256 checksum of the data.
-func Sum256(data []byte) [Size]byte {
-	h := New()
-	h.Write(data)
+func Sum256(data []byte) (sum256 [Size]byte) {
+	d := New()
+	d.Write(data)
 	var cs [Size]byte
-	copy(cs[:], h.Sum(nil))
+	copy(cs[:], d.Sum(nil))
+	return cs
+}
+
+// Sum224 returns the SHA224 checksum of the data.
+func Sum224(data []byte) (sum224 [Size224]byte) {
+	d := New224()
+	d.Write(data)
+	var cs [Size224]byte
+	copy(cs[:], d.Sum(nil))
 	return cs
 }
