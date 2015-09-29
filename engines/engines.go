@@ -8,9 +8,10 @@ package engines
 #include "openssl/engine.h"
 */
 import "C"
-import "fmt"
-import "unsafe"
-import "runtime"
+import (
+	"runtime"
+	"unsafe"
+)
 
 var Init int = func() int {
 	C.ERR_load_ENGINE_strings()
@@ -20,156 +21,179 @@ var Init int = func() int {
 func LoadBuiltinEngines() {
 	C.ENGINE_load_builtin_engines()
 }
+
 func LoadCryptodev() {
 	C.ENGINE_load_cryptodev()
 }
-func LoadRsax() {
-	C.ENGINE_load_rsax()
-}
+
 func LoadRdrand() {
 	C.ENGINE_load_rdrand()
 }
+
 func LoadOpenssl() {
 	C.ENGINE_load_openssl()
 }
+
 func LoadDynamic() {
 	C.ENGINE_load_dynamic()
 }
 
-type ENGINE struct {
-	engine *C.ENGINE
+// Engine wraps an openssl ENGINE
+type Engine struct {
+	eng *C.ENGINE
 }
 
-func (self *ENGINE) String() string {
-	return fmt.Sprintf("<id:%s @%p>", self.id(), self)
+func (e *Engine) GetCEngine() *C.ENGINE {
+	return e.eng
 }
 
-//instantiates a new engine and adds a "destuctor hook"
-func newEngine(engine *C.ENGINE) *ENGINE {
-	if engine == nil {
+// New instantiates a new engine and adds a "destuctor hook" to it
+func New(e *C.ENGINE) *Engine {
+	if e == nil {
 		return nil
 	}
-	e := ENGINE{engine}
-	runtime.SetFinalizer(&e, freeEngine)
-	return &e
-}
-func freeEngine(self *ENGINE) {
-	C.ENGINE_free(self.engine)
-	return
-}
-func GetFirst() *ENGINE {
-	return newEngine(C.ENGINE_get_first())
-}
-func GetLast() *ENGINE {
-	return newEngine(C.ENGINE_get_last())
-}
-func ById(id string) *ENGINE {
-	id_p := C.CString(id)
-	defer C.free(unsafe.Pointer(id_p))
-	return newEngine(C.ENGINE_by_id(id_p))
-}
-func Cleanup() {
-	C.ENGINE_cleanup()
+	eng := &Engine{eng: e}
+	runtime.SetFinalizer(eng, freeEngine)
+	return eng
 }
 
-//structural reference methods
-func (self *ENGINE) GetPrev() *ENGINE {
-	return newEngine(C.ENGINE_get_prev(self.engine))
-}
-func (self *ENGINE) GetNext() *ENGINE {
-	return newEngine(C.ENGINE_get_next(self.engine))
-}
-func (self *ENGINE) remove() int {
-	return int(C.ENGINE_remove(self.engine))
-}
-func (self *ENGINE) add() int {
-	return int(C.ENGINE_add(self.engine))
-}
-func (self *ENGINE) id() string {
-	return C.GoString(C.ENGINE_get_id(self.engine))
-}
-func (self *ENGINE) name() string {
-	return C.GoString(C.ENGINE_get_name(self.engine))
-}
-func (self *ENGINE) flags() int {
-	return int(C.ENGINE_get_flags(self.engine))
+func freeEngine(e *Engine) {
+	C.ENGINE_free(e.eng)
 }
 
-//these methods interrogate the OpenSSL library to getermine what
-//operations they are using.
-func finishEngine(self *ENGINE) {
-	C.ENGINE_finish(self.engine)
-	return
+func NewFirst() *Engine {
+	return New(C.ENGINE_get_first())
+}
+
+func NewLast() *Engine {
+	return New(C.ENGINE_get_last())
+}
+
+func NewById(id string) *Engine {
+	eid := C.CString(id)
+	defer C.free(unsafe.Pointer(eid))
+	return New(C.ENGINE_by_id(eid))
 }
 
 //functional engines are just like regular engines but require
 //engine_finish rather than engine_free to be called I guess.
-func newFunctionalEngine(engine *C.ENGINE) *ENGINE {
-	if engine == nil {
+func NewFunctional(e *C.ENGINE) *Engine {
+	if e == nil {
 		return nil
 	}
-	e := ENGINE{engine}
-	runtime.SetFinalizer(&e, finishEngine)
-	return &e
+	eng := &Engine{eng: e}
+	runtime.SetFinalizer(eng, finishEngine)
+	return eng
 }
 
-//get the default RSA implmentation
-func GetDefaultRSA() *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_default_RSA())
-}
-func GetDefaultDSA() *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_default_DSA())
-}
-func GetDefaultECDH() *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_default_ECDH())
-}
-func GetDefaultECDSA() *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_default_ECDSA())
-}
-func GetDefaultRAND() *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_default_RAND())
-}
-func GetCipherEngine(nid int) *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_cipher_engine(C.int(nid)))
-}
-func GetDigestEngine(nid int) *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_digest_engine(C.int(nid)))
-}
-func GetPKeyMethEngine(nid int) *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_pkey_meth_engine(C.int(nid)))
-}
-func GetPKeyASN1MethEngine(nid int) *ENGINE {
-	return newFunctionalEngine(C.ENGINE_get_pkey_asn1_meth_engine(C.int(nid)))
+func finishEngine(e *Engine) {
+	C.ENGINE_finish(e.eng)
 }
 
-//these set default engines for RSA operations
-func SetDefaultRSA(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_RSA(engine.engine))
+func NewFunctionalDefaultRSA() *Engine {
+	return NewFunctional(C.ENGINE_get_default_RSA())
 }
-func SetDefaultDSA(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_DSA(engine.engine))
+
+func NewFunctionalDefaultDSA() *Engine {
+	return NewFunctional(C.ENGINE_get_default_DSA())
 }
-func SetDefaultECDH(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_ECDH(engine.engine))
+
+func NewFunctionalDefaultECDH() *Engine {
+	return NewFunctional(C.ENGINE_get_default_ECDH())
 }
-func SetDefaultECDSA(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_ECDSA(engine.engine))
+
+func NewFunctionalDefaultECDSA() *Engine {
+	return NewFunctional(C.ENGINE_get_default_ECDSA())
 }
-func SetDefaultDH(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_DH(engine.engine))
+
+func NewFunctionalDefaultRAND() *Engine {
+	return NewFunctional(C.ENGINE_get_default_RAND())
 }
-func SetDefaultRAND(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_RAND(engine.engine))
+
+func NewFunctionalByCipherEngine(nid int) *Engine {
+	return NewFunctional(C.ENGINE_get_cipher_engine(C.int(nid)))
 }
-func SetDefaultCiphers(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_ciphers(engine.engine))
+
+func NewFunctionalByDigestEngine(nid int) *Engine {
+	return NewFunctional(C.ENGINE_get_digest_engine(C.int(nid)))
 }
-func SetDefaultDigests(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_digests(engine.engine))
+
+func NewFunctionalByPKeyMethEngine(nid int) *Engine {
+	return NewFunctional(C.ENGINE_get_pkey_meth_engine(C.int(nid)))
 }
-func SetDefaultPKeyMeths(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_pkey_meths(engine.engine))
+
+func NewFunctionalByPKeyASN1MethEngine(nid int) *Engine {
+	return NewFunctional(C.ENGINE_get_pkey_asn1_meth_engine(C.int(nid)))
 }
-func SetDefaultPKeyASN1Meths(engine *ENGINE) int {
-	return int(C.ENGINE_set_default_pkey_asn1_meths(engine.engine))
+
+func (e *Engine) GetPrev() *Engine {
+	return New(C.ENGINE_get_prev(e.eng))
+}
+
+func (e *Engine) GetNext() *Engine {
+	return New(C.ENGINE_get_next(e.eng))
+}
+
+func (e *Engine) Remove() int {
+	return int(C.ENGINE_remove(e.eng))
+}
+
+func (e *Engine) Add() int {
+	return int(C.ENGINE_add(e.eng))
+}
+
+func (e *Engine) ID() string {
+	return C.GoString(C.ENGINE_get_id(e.eng))
+}
+
+func (e *Engine) Name() string {
+	return C.GoString(C.ENGINE_get_name(e.eng))
+}
+
+func (e *Engine) Flags() int {
+	return int(C.ENGINE_get_flags(e.eng))
+}
+
+func Cleanup() {
+	C.ENGINE_cleanup()
+}
+
+func SetDefaultRSA(e *Engine) int {
+	return int(C.ENGINE_set_default_RSA(e.eng))
+}
+
+func SetDefaultDSA(e *Engine) int {
+	return int(C.ENGINE_set_default_DSA(e.eng))
+}
+
+func SetDefaultECDH(e *Engine) int {
+	return int(C.ENGINE_set_default_ECDH(e.eng))
+}
+
+func SetDefaultECDSA(e *Engine) int {
+	return int(C.ENGINE_set_default_ECDSA(e.eng))
+}
+
+func SetDefaultDH(e *Engine) int {
+	return int(C.ENGINE_set_default_DH(e.eng))
+}
+
+func SetDefaultRAND(e *Engine) int {
+	return int(C.ENGINE_set_default_RAND(e.eng))
+}
+
+func SetDefaultCiphers(e *Engine) int {
+	return int(C.ENGINE_set_default_ciphers(e.eng))
+}
+
+func SetDefaultDigests(e *Engine) int {
+	return int(C.ENGINE_set_default_digests(e.eng))
+}
+
+func SetDefaultPKeyMeths(e *Engine) int {
+	return int(C.ENGINE_set_default_pkey_meths(e.eng))
+}
+
+func SetDefaultPKeyASN1Meths(e *Engine) int {
+	return int(C.ENGINE_set_default_pkey_asn1_meths(e.eng))
 }
