@@ -5,7 +5,7 @@ import "time"
 import "hash"
 import "crypto/rand"
 import "crypto/sha256"
-import sslSha256 "github.com/shanemhansen/gossl/sha256"
+import gosslSHA256 "github.com/shanemhansen/gossl/sha256"
 
 func bench_sha256(h *hash.Hash, msg string) {
 	bufsize := 10240
@@ -17,7 +17,7 @@ func bench_sha256(h *hash.Hash, msg string) {
 		if err != nil {
 			panic("problem reading random data")
 		}
-		(*h).Write(buf[0:n])
+		(*h).Write(buf[:n])
 	}
 	fmt.Printf("%s took %s to process %d mb\n", msg, time.Since(t), bufsize*iterations/1024/1024)
 
@@ -26,6 +26,6 @@ func main() {
 	fmt.Println("This program benchmarks crypto/sha256 and aes/sha256 implementations")
 	h := sha256.New()
 	bench_sha256(&h, "crypto/sha256")
-	ssl := sslSha256.New()
-	bench_sha256(&ssl, "ssl/aes")
+	c := gosslSHA256.New()
+	bench_sha256(&c, "gossl/sha256")
 }
