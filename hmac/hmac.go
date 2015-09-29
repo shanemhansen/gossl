@@ -31,16 +31,23 @@ type hmac struct {
 // know what went wrong.
 // Currently only `crypto.SHA512`, `crypto.SHA384`, `crypto.SHA256`,
 // `crypto.SHA224`, `cryptoSHA1` and `crypto.MD5` are the only
-// supported hashes. If an unsupported hash is provided it will cause a panic.
+// supported hashes.
+// If an unsupported hash is provided the function will just return `nil` and
+// no error from `sslerr` is given.
 func New(h func() hash.Hash, key []byte) hash.Hash {
 	return NewWithEngine(nil, h, key)
 }
 
+// NewWithEngine behaves the same as New but it accepts a pointer to an
+// `engine.Engine` to setup the engine to use during ctx setup.
 func NewWithEngine(e *engine.Engine, h func() hash.Hash, key []byte) hash.Hash {
 	if h == nil {
 		return nil
 	}
 	evp := getEVP(h())
+	if evp == nil {
+		return nil
+	}
 	var eng *C.ENGINE
 	if e != nil {
 		eng = (*C.ENGINE)(e.GetCEngine())
@@ -131,8 +138,6 @@ func getEVP(h hash.Hash) *C.EVP_MD {
 	case "sha512":
 		evp = C.EVP_sha512()
 		break
-	default:
-		panic("unsupported hash: " + hashName)
 	}
 	return evp
 }
@@ -149,15 +154,19 @@ func getHashName(h hash.Hash) string {
 	elem := reflect.ValueOf(h).Elem()
 	switch hashName {
 	case "sha256":
-		is224 := elem.FieldByName("is224").Bool()
-		if is224 {
-			hashName = "sha224"
+		f := elem.FieldByName("is224")
+		if f.IsValid() {
+			if f.Bool() {
+				hashName = "sha224"
+			}
 		}
 		break
 	case "sha512":
-		d := elem.FieldByName("function").Uint()
-		if crypto.Hash(d) == crypto.SHA384 {
-			hashName = "sha384"
+		f := elem.FieldByName("function")
+		if f.IsValid() {
+			if crypto.Hash(f.Uint()) == crypto.SHA384 {
+				hashName = "sha384"
+			}
 		}
 		break
 	}
