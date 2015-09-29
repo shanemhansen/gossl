@@ -68,7 +68,7 @@ func (self *Conn) RemoteAddr() net.Addr {
 }
 func (self *Conn) Read(b []byte) (int, error) {
 	if err := self.Handshake(); err != nil {
-		fmt.Printf("handshake failed %r;\n", err)
+		fmt.Printf("handshake failed %s;\n", err)
 		return 0, err
 	}
 	return self.ssl.Read(b)
