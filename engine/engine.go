@@ -1,7 +1,7 @@
 // Package engines provides an interface to the OpenSSL engines api.
 // Mostly useful for enabling disabling hardware acceleration afaik.
 // See http://www.openssl.org/docs/crypto/engine.html
-package engines
+package engine
 
 /*
 #cgo pkg-config: openssl

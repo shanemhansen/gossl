@@ -18,7 +18,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/shanemhansen/gossl/engines"
+	"github.com/shanemhansen/gossl/engine"
 	"github.com/shanemhansen/gossl/sslerr"
 )
 
@@ -36,7 +36,7 @@ func New(h func() hash.Hash, key []byte) hash.Hash {
 	return NewWithEngine(nil, h, key)
 }
 
-func NewWithEngine(e *engines.Engine, h func() hash.Hash, key []byte) hash.Hash {
+func NewWithEngine(e *engine.Engine, h func() hash.Hash, key []byte) hash.Hash {
 	if h == nil {
 		return nil
 	}
