@@ -49,7 +49,7 @@ func ParseCertificatePEM(pemData []byte) (*Certificate, error) {
 	bio := C.BIO_new_mem_buf(buffer, length)
 	cert := C.PEM_read_bio_X509(bio, nil, nil, nil)
 	if cert == nil {
-		return nil, errors.New("problem loading certificate" + sslerr.SSLErrorMessage())
+		return nil, errors.New("problem loading certificate" + sslerr.SSLErrorMessage().String())
 	}
 	return &Certificate{X509: cert}, nil
 
@@ -64,7 +64,7 @@ func ParseCertificate(asn1Data []byte) (*Certificate, error) {
 	bio := C.BIO_new_mem_buf(buffer, length)
 	sslCert := C.d2i_X509_bio(bio, nil)
 	if sslCert == nil {
-		return nil, errors.New("problem loading cert" + sslerr.SSLErrorMessage())
+		return nil, errors.New("problem loading cert" + sslerr.SSLErrorMessage().String())
 	}
 	cert := new(Certificate)
 	cert.X509 = sslCert

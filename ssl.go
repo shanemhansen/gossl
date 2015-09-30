@@ -91,7 +91,7 @@ func (self *SSL) getError(ret C.int) error {
 		}
 
 	default:
-		msg := sslerr.SSLErrorMessage()
+		msg := sslerr.SSLErrorMessage().String()
 		return errors.New(msg)
 	}
 	return nil
