@@ -44,28 +44,23 @@ func go_conn_bio_read(bio *C.BIO, buf *C.char, num C.int) C.int {
 	var conn *Conn = (*Conn)(bio.ptr)
 	var size int = int(num)
 	data := GoSliceFromCString(buf, size)
-	n, err := conn.conn.Read(data)
-	if err == nil {
+	if n, err := conn.conn.Read(data); err == nil {
 		return C.int(n)
 	}
-	if err == io.EOF {
+	if err == io.EOF || err == io.ErrUnexpectedEOF {
 		return 0
-	} else if err == io.ErrUnexpectedEOF {
-		return 0
-	} else {
-		//We expect either a syscall error
-		//or a netOp error wrapping a syscall error
-	TESTERR:
-		switch err.(type) {
-		case syscall.Errno:
-			C.set_errno(C.int(err.(syscall.Errno)))
-		case *net.OpError:
-			err = err.(*net.OpError).Err
-			break TESTERR
-		}
-		return C.int(-1)
 	}
-	return 0
+	//We expect either a syscall error
+	//or a netOp error wrapping a syscall error
+TESTERR:
+	switch err.(type) {
+	case syscall.Errno:
+		C.set_errno(C.int(err.(syscall.Errno)))
+	case *net.OpError:
+		err = err.(*net.OpError).Err
+		break TESTERR
+	}
+	return C.int(-1)
 }
 
 //export go_conn_bio_new
