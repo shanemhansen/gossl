@@ -1,66 +1,60 @@
 package sslerr
 
 /*
+#cgo pkg-config: openssl
 #include "openssl/ssl.h"
 #include "openssl/conf.h"
 #include "openssl/err.h"
-#cgo pkg-config: openssl
-
 */
 import "C"
-import "fmt"
-import "unsafe"
-
-var sslFmtString = "%s:%s:%s\n"
-
-type errCode C.ulong
-
-var inited bool = false
+import (
+	"fmt"
+	"unsafe"
+)
 
 func init() {
-	Init()
-}
-
-// OpenSSL loading
-func Init() {
-	if !inited {
-		C.ERR_load_ERR_strings()
-		C.ERR_load_crypto_strings()
-		C.OPENSSL_config(nil)
-	}
-	inited = true
+	C.ERR_load_ERR_strings()
+	C.ERR_load_crypto_strings()
+	C.OPENSSL_config(nil)
 }
 
 // OpenSSL cleanup and freeing
 func Cleanup() {
-	if inited {
-		C.ERR_free_strings()
-	}
-	inited = false
+	C.ERR_free_strings()
 }
 
-func SSLErrorMessage() string {
-	msg := ""
-	for {
-		err_code := C.ERR_get_error()
-		if err_code == 0 {
-			break
-		}
-		msg += get_error_string(errCode(err_code))
-	}
-	C.ERR_clear_error()
-	return msg
+type SSLError struct {
+	msg string
 }
 
-func get_error_string(code errCode) string {
-	err_code := C.ulong(code)
-	if err_code == 0 {
+func (err SSLError) String() string {
+	if len(err.msg) == 0 {
 		return ""
 	}
-	msg := fmt.Sprintf(sslFmtString,
-		C.GoString(C.ERR_lib_error_string(err_code)),
-		C.GoString(C.ERR_func_error_string(err_code)),
-		C.GoString(C.ERR_reason_error_string(err_code)))
+	return fmt.Sprintf("%s", err.msg)
+}
+
+func SSLErrorMessage() SSLError {
+	msg := ""
+	for {
+		errCode := C.ERR_get_error()
+		if errCode == 0 {
+			break
+		}
+		msg += getErrorString(errCode)
+	}
+	C.ERR_clear_error()
+	return SSLError{msg: msg}
+}
+
+func getErrorString(code C.ulong) string {
+	if code == 0 {
+		return ""
+	}
+	msg := fmt.Sprintf("%s:%s:%s\n",
+		C.GoString(C.ERR_lib_error_string(code)),
+		C.GoString(C.ERR_func_error_string(code)),
+		C.GoString(C.ERR_reason_error_string(code)))
 	if len(msg) == 4 { //being lazy here, all the strings were empty
 		return ""
 	}
@@ -82,7 +76,7 @@ func get_error_string(code errCode) string {
 }
 
 func Error() error {
-	return formatError(SSLErrorMessage())
+	return formatError(SSLErrorMessage().String())
 }
 
 func formatError(msg string) error {
