@@ -1,0 +1,238 @@
+pkg crypto/x509, const CANotAuthorizedForThisName = 2
+pkg crypto/x509, const CANotAuthorizedForThisName InvalidReason
+pkg crypto/x509, const DSA = 2
+pkg crypto/x509, const DSA PublicKeyAlgorithm
+pkg crypto/x509, const DSAWithSHA1 = 7
+pkg crypto/x509, const DSAWithSHA1 SignatureAlgorithm
+pkg crypto/x509, const DSAWithSHA256 = 8
+pkg crypto/x509, const DSAWithSHA256 SignatureAlgorithm
+pkg crypto/x509, const ECDSA = 3
+pkg crypto/x509, const ECDSA PublicKeyAlgorithm
+pkg crypto/x509, const ECDSAWithSHA1 = 9
+pkg crypto/x509, const ECDSAWithSHA1 SignatureAlgorithm
+pkg crypto/x509, const ECDSAWithSHA256 = 10
+pkg crypto/x509, const ECDSAWithSHA256 SignatureAlgorithm
+pkg crypto/x509, const ECDSAWithSHA384 = 11
+pkg crypto/x509, const ECDSAWithSHA384 SignatureAlgorithm
+pkg crypto/x509, const ECDSAWithSHA512 = 12
+pkg crypto/x509, const ECDSAWithSHA512 SignatureAlgorithm
+pkg crypto/x509, const Expired = 1
+pkg crypto/x509, const Expired InvalidReason
+pkg crypto/x509, const ExtKeyUsageAny = 0
+pkg crypto/x509, const ExtKeyUsageAny ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageClientAuth = 2
+pkg crypto/x509, const ExtKeyUsageClientAuth ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageCodeSigning = 3
+pkg crypto/x509, const ExtKeyUsageCodeSigning ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageEmailProtection = 4
+pkg crypto/x509, const ExtKeyUsageEmailProtection ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageIPSECEndSystem = 5
+pkg crypto/x509, const ExtKeyUsageIPSECEndSystem ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageIPSECTunnel = 6
+pkg crypto/x509, const ExtKeyUsageIPSECTunnel ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageIPSECUser = 7
+pkg crypto/x509, const ExtKeyUsageIPSECUser ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageMicrosoftServerGatedCrypto = 10
+pkg crypto/x509, const ExtKeyUsageMicrosoftServerGatedCrypto ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageNetscapeServerGatedCrypto = 11
+pkg crypto/x509, const ExtKeyUsageNetscapeServerGatedCrypto ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageOCSPSigning = 9
+pkg crypto/x509, const ExtKeyUsageOCSPSigning ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageServerAuth = 1
+pkg crypto/x509, const ExtKeyUsageServerAuth ExtKeyUsage
+pkg crypto/x509, const ExtKeyUsageTimeStamping = 8
+pkg crypto/x509, const ExtKeyUsageTimeStamping ExtKeyUsage
+pkg crypto/x509, const IncompatibleUsage = 4
+pkg crypto/x509, const IncompatibleUsage InvalidReason
+pkg crypto/x509, const KeyUsageCRLSign = 64
+pkg crypto/x509, const KeyUsageCRLSign KeyUsage
+pkg crypto/x509, const KeyUsageCertSign = 32
+pkg crypto/x509, const KeyUsageCertSign KeyUsage
+pkg crypto/x509, const KeyUsageContentCommitment = 2
+pkg crypto/x509, const KeyUsageContentCommitment KeyUsage
+pkg crypto/x509, const KeyUsageDataEncipherment = 8
+pkg crypto/x509, const KeyUsageDataEncipherment KeyUsage
+pkg crypto/x509, const KeyUsageDecipherOnly = 256
+pkg crypto/x509, const KeyUsageDecipherOnly KeyUsage
+pkg crypto/x509, const KeyUsageDigitalSignature = 1
+pkg crypto/x509, const KeyUsageDigitalSignature KeyUsage
+pkg crypto/x509, const KeyUsageEncipherOnly = 128
+pkg crypto/x509, const KeyUsageEncipherOnly KeyUsage
+pkg crypto/x509, const KeyUsageKeyAgreement = 16
+pkg crypto/x509, const KeyUsageKeyAgreement KeyUsage
+pkg crypto/x509, const KeyUsageKeyEncipherment = 4
+pkg crypto/x509, const KeyUsageKeyEncipherment KeyUsage
+pkg crypto/x509, const MD2WithRSA = 1
+pkg crypto/x509, const MD2WithRSA SignatureAlgorithm
+pkg crypto/x509, const MD5WithRSA = 2
+pkg crypto/x509, const MD5WithRSA SignatureAlgorithm
+pkg crypto/x509, const NotAuthorizedToSign = 0
+pkg crypto/x509, const NotAuthorizedToSign InvalidReason
+pkg crypto/x509, const RSA = 1
+pkg crypto/x509, const RSA PublicKeyAlgorithm
+pkg crypto/x509, const SHA1WithRSA = 3
+pkg crypto/x509, const SHA1WithRSA SignatureAlgorithm
+pkg crypto/x509, const SHA256WithRSA = 4
+pkg crypto/x509, const SHA256WithRSA SignatureAlgorithm
+pkg crypto/x509, const SHA384WithRSA = 5
+pkg crypto/x509, const SHA384WithRSA SignatureAlgorithm
+pkg crypto/x509, const SHA512WithRSA = 6
+pkg crypto/x509, const SHA512WithRSA SignatureAlgorithm
+pkg crypto/x509, const TooManyIntermediates = 3
+pkg crypto/x509, const TooManyIntermediates InvalidReason
+pkg crypto/x509, const UnknownPublicKeyAlgorithm = 0
+pkg crypto/x509, const UnknownPublicKeyAlgorithm PublicKeyAlgorithm
+pkg crypto/x509, const UnknownSignatureAlgorithm = 0
+pkg crypto/x509, const UnknownSignatureAlgorithm SignatureAlgorithm
+pkg crypto/x509, func CreateCertificate(io.Reader, *Certificate, *Certificate, interface{}, interface{}) ([]uint8, error)
+pkg crypto/x509, func CreateCertificateRequest(io.Reader, *CertificateRequest, interface{}) ([]uint8, error)
+pkg crypto/x509, func MarshalECPrivateKey(*ecdsa.PrivateKey) ([]uint8, error)
+pkg crypto/x509, func MarshalPKCS1PrivateKey(*rsa.PrivateKey) []uint8
+pkg crypto/x509, func MarshalPKIXPublicKey(interface{}) ([]uint8, error)
+pkg crypto/x509, func NewCertPool() *CertPool
+pkg crypto/x509, func ParseECPrivateKey([]uint8) (*ecdsa.PrivateKey, error)
+pkg crypto/x509, func ParsePKCS1PrivateKey([]uint8) (*rsa.PrivateKey, error)
+pkg crypto/x509, func ParsePKCS8PrivateKey([]uint8) (interface{}, error)
+pkg crypto/x509, func ParsePKIXPublicKey([]uint8) (interface{}, error)
+pkg crypto/x509, method (*CertPool) AddCert(*Certificate)
+pkg crypto/x509, method (*CertPool) AppendCertsFromPEM([]uint8) bool
+pkg crypto/x509, method (*CertPool) Subjects() [][]uint8
+pkg crypto/x509, method (*Certificate) CheckCRLSignature(*pkix.CertificateList) error
+pkg crypto/x509, method (*Certificate) CheckSignature(SignatureAlgorithm, []uint8, []uint8) error
+pkg crypto/x509, method (*Certificate) CheckSignatureFrom(*Certificate) error
+pkg crypto/x509, method (*Certificate) CreateCRL(io.Reader, interface{}, []pkix.RevokedCertificate, time.Time, time.Time) ([]uint8, error)
+pkg crypto/x509, method (*Certificate) Equal(*Certificate) bool
+pkg crypto/x509, method (*Certificate) Verify(VerifyOptions) ([][]*Certificate, error)
+pkg crypto/x509, method (*Certificate) VerifyHostname(string) error
+pkg crypto/x509, method (*CertificateRequest) CheckSignature() error
+pkg crypto/x509, method (CertificateInvalidError) Error() string
+pkg crypto/x509, method (ConstraintViolationError) Error() string
+pkg crypto/x509, method (HostnameError) Error() string
+pkg crypto/x509, method (SystemRootsError) Error() string
+pkg crypto/x509, method (UnhandledCriticalExtension) Error() string
+pkg crypto/x509, method (UnknownAuthorityError) Error() string
+pkg crypto/x509, type CertPool struct
+pkg crypto/x509, type Certificate struct
+pkg crypto/x509, type Certificate struct, AuthorityKeyId []uint8
+pkg crypto/x509, type Certificate struct, BasicConstraintsValid bool
+pkg crypto/x509, type Certificate struct, CRLDistributionPoints []string
+pkg crypto/x509, type Certificate struct, DNSNames []string
+pkg crypto/x509, type Certificate struct, EmailAddresses []string
+pkg crypto/x509, type Certificate struct, ExtKeyUsage []ExtKeyUsage
+pkg crypto/x509, type Certificate struct, Extensions []pkix.Extension
+pkg crypto/x509, type Certificate struct, ExtraExtensions []pkix.Extension
+pkg crypto/x509, type Certificate struct, IPAddresses []net.IP
+pkg crypto/x509, type Certificate struct, IsCA bool
+pkg crypto/x509, type Certificate struct, Issuer pkix.Name
+pkg crypto/x509, type Certificate struct, IssuingCertificateURL []string
+pkg crypto/x509, type Certificate struct, KeyUsage KeyUsage
+pkg crypto/x509, type Certificate struct, MaxPathLen int
+pkg crypto/x509, type Certificate struct, MaxPathLenZero bool
+pkg crypto/x509, type Certificate struct, NotAfter time.Time
+pkg crypto/x509, type Certificate struct, NotBefore time.Time
+pkg crypto/x509, type Certificate struct, OCSPServer []string
+pkg crypto/x509, type Certificate struct, PermittedDNSDomains []string
+pkg crypto/x509, type Certificate struct, PermittedDNSDomainsCritical bool
+pkg crypto/x509, type Certificate struct, PolicyIdentifiers []asn1.ObjectIdentifier
+pkg crypto/x509, type Certificate struct, PublicKey interface{}
+pkg crypto/x509, type Certificate struct, PublicKeyAlgorithm PublicKeyAlgorithm
+pkg crypto/x509, type Certificate struct, Raw []uint8
+pkg crypto/x509, type Certificate struct, RawIssuer []uint8
+pkg crypto/x509, type Certificate struct, RawSubject []uint8
+pkg crypto/x509, type Certificate struct, RawSubjectPublicKeyInfo []uint8
+pkg crypto/x509, type Certificate struct, RawTBSCertificate []uint8
+pkg crypto/x509, type Certificate struct, SerialNumber *big.Int
+pkg crypto/x509, type Certificate struct, Signature []uint8
+pkg crypto/x509, type Certificate struct, SignatureAlgorithm SignatureAlgorithm
+pkg crypto/x509, type Certificate struct, Subject pkix.Name
+pkg crypto/x509, type Certificate struct, SubjectKeyId []uint8
+pkg crypto/x509, type Certificate struct, UnhandledCriticalExtensions []asn1.ObjectIdentifier
+pkg crypto/x509, type Certificate struct, UnknownExtKeyUsage []asn1.ObjectIdentifier
+pkg crypto/x509, type Certificate struct, Version int
+pkg crypto/x509, type CertificateInvalidError struct
+pkg crypto/x509, type CertificateInvalidError struct, Cert *Certificate
+pkg crypto/x509, type CertificateInvalidError struct, Reason InvalidReason
+pkg crypto/x509, type CertificateRequest struct
+pkg crypto/x509, type CertificateRequest struct, Attributes []pkix.AttributeTypeAndValueSET
+pkg crypto/x509, type CertificateRequest struct, DNSNames []string
+pkg crypto/x509, type CertificateRequest struct, EmailAddresses []string
+pkg crypto/x509, type CertificateRequest struct, Extensions []pkix.Extension
+pkg crypto/x509, type CertificateRequest struct, ExtraExtensions []pkix.Extension
+pkg crypto/x509, type CertificateRequest struct, IPAddresses []net.IP
+pkg crypto/x509, type CertificateRequest struct, PublicKey interface{}
+pkg crypto/x509, type CertificateRequest struct, PublicKeyAlgorithm PublicKeyAlgorithm
+pkg crypto/x509, type CertificateRequest struct, Raw []uint8
+pkg crypto/x509, type CertificateRequest struct, RawSubject []uint8
+pkg crypto/x509, type CertificateRequest struct, RawSubjectPublicKeyInfo []uint8
+pkg crypto/x509, type CertificateRequest struct, RawTBSCertificateRequest []uint8
+pkg crypto/x509, type CertificateRequest struct, Signature []uint8
+pkg crypto/x509, type CertificateRequest struct, SignatureAlgorithm SignatureAlgorithm
+pkg crypto/x509, type CertificateRequest struct, Subject pkix.Name
+pkg crypto/x509, type CertificateRequest struct, Version int
+pkg crypto/x509, type ConstraintViolationError struct
+pkg crypto/x509, type ExtKeyUsage int
+pkg crypto/x509, type HostnameError struct
+pkg crypto/x509, type HostnameError struct, Certificate *Certificate
+pkg crypto/x509, type HostnameError struct, Host string
+pkg crypto/x509, type InvalidReason int
+pkg crypto/x509, type KeyUsage int
+pkg crypto/x509, type PublicKeyAlgorithm int
+pkg crypto/x509, type SignatureAlgorithm int
+pkg crypto/x509, type SystemRootsError struct
+pkg crypto/x509, type UnhandledCriticalExtension struct
+pkg crypto/x509, type UnknownAuthorityError struct
+pkg crypto/x509, type VerifyOptions struct
+pkg crypto/x509, type VerifyOptions struct, CurrentTime time.Time
+pkg crypto/x509, type VerifyOptions struct, DNSName string
+pkg crypto/x509, type VerifyOptions struct, Intermediates *CertPool
+pkg crypto/x509, type VerifyOptions struct, KeyUsages []ExtKeyUsage
+pkg crypto/x509, type VerifyOptions struct, Roots *CertPool
+pkg crypto/x509, var ErrUnsupportedAlgorithm error
+pkg crypto/x509, var IncorrectPasswordError error
+pkg crypto/x509/pkix, method (*CertificateList) HasExpired(time.Time) bool
+pkg crypto/x509/pkix, method (*Name) FillFromRDNSequence(*RDNSequence)
+pkg crypto/x509/pkix, method (Name) ToRDNSequence() RDNSequence
+pkg crypto/x509/pkix, type AlgorithmIdentifier struct
+pkg crypto/x509/pkix, type AlgorithmIdentifier struct, Algorithm asn1.ObjectIdentifier
+pkg crypto/x509/pkix, type AlgorithmIdentifier struct, Parameters asn1.RawValue
+pkg crypto/x509/pkix, type AttributeTypeAndValue struct
+pkg crypto/x509/pkix, type AttributeTypeAndValue struct, Type asn1.ObjectIdentifier
+pkg crypto/x509/pkix, type AttributeTypeAndValue struct, Value interface{}
+pkg crypto/x509/pkix, type AttributeTypeAndValueSET struct
+pkg crypto/x509/pkix, type AttributeTypeAndValueSET struct, Type asn1.ObjectIdentifier
+pkg crypto/x509/pkix, type AttributeTypeAndValueSET struct, Value [][]AttributeTypeAndValue
+pkg crypto/x509/pkix, type CertificateList struct
+pkg crypto/x509/pkix, type CertificateList struct, SignatureAlgorithm AlgorithmIdentifier
+pkg crypto/x509/pkix, type CertificateList struct, SignatureValue asn1.BitString
+pkg crypto/x509/pkix, type CertificateList struct, TBSCertList TBSCertificateList
+pkg crypto/x509/pkix, type Extension struct
+pkg crypto/x509/pkix, type Extension struct, Critical bool
+pkg crypto/x509/pkix, type Extension struct, Id asn1.ObjectIdentifier
+pkg crypto/x509/pkix, type Extension struct, Value []uint8
+pkg crypto/x509/pkix, type Name struct
+pkg crypto/x509/pkix, type Name struct, CommonName string
+pkg crypto/x509/pkix, type Name struct, Country []string
+pkg crypto/x509/pkix, type Name struct, ExtraNames []AttributeTypeAndValue
+pkg crypto/x509/pkix, type Name struct, Locality []string
+pkg crypto/x509/pkix, type Name struct, Names []AttributeTypeAndValue
+pkg crypto/x509/pkix, type Name struct, Organization []string
+pkg crypto/x509/pkix, type Name struct, OrganizationalUnit []string
+pkg crypto/x509/pkix, type Name struct, PostalCode []string
+pkg crypto/x509/pkix, type Name struct, Province []string
+pkg crypto/x509/pkix, type Name struct, SerialNumber string
+pkg crypto/x509/pkix, type Name struct, StreetAddress []string
+pkg crypto/x509/pkix, type RDNSequence []RelativeDistinguishedNameSET
+pkg crypto/x509/pkix, type RelativeDistinguishedNameSET []AttributeTypeAndValue
+pkg crypto/x509/pkix, type RevokedCertificate struct
+pkg crypto/x509/pkix, type RevokedCertificate struct, Extensions []Extension
+pkg crypto/x509/pkix, type RevokedCertificate struct, RevocationTime time.Time
+pkg crypto/x509/pkix, type RevokedCertificate struct, SerialNumber *big.Int
+pkg crypto/x509/pkix, type TBSCertificateList struct
+pkg crypto/x509/pkix, type TBSCertificateList struct, Extensions []Extension
+pkg crypto/x509/pkix, type TBSCertificateList struct, Issuer RDNSequence
+pkg crypto/x509/pkix, type TBSCertificateList struct, NextUpdate time.Time
+pkg crypto/x509/pkix, type TBSCertificateList struct, Raw asn1.RawContent
+pkg crypto/x509/pkix, type TBSCertificateList struct, RevokedCertificates []RevokedCertificate
+pkg crypto/x509/pkix, type TBSCertificateList struct, Signature AlgorithmIdentifier
+pkg crypto/x509/pkix, type TBSCertificateList struct, ThisUpdate time.Time
+pkg crypto/x509/pkix, type TBSCertificateList struct, Version int
