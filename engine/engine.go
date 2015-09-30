@@ -13,10 +13,9 @@ import (
 	"unsafe"
 )
 
-var Init int = func() int {
+func init() {
 	C.ERR_load_ENGINE_strings()
-	return 1
-}()
+}
 
 func LoadBuiltinEngines() {
 	C.ENGINE_load_builtin_engines()
