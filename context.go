@@ -33,7 +33,7 @@ func contextFree(self *Context) {
 
 func (self *Context) UsePrivateKey(key *evp.PKey) error {
 	if int(C.SSL_CTX_use_PrivateKey(self.Ctx, (*C.EVP_PKEY)(unsafe.Pointer(key.PKey)))) != 1 {
-		return errors.New("problem loading key " + sslerr.SSLErrorMessage())
+		return errors.New("problem loading key " + sslerr.SSLErrorMessage().String())
 	}
 	return nil
 }
@@ -41,7 +41,7 @@ func (self *Context) UsePrivateKey(key *evp.PKey) error {
 func (self *Context) UseCertificate(cert *Certificate) error {
 
 	if int(C.SSL_CTX_use_certificate(self.Ctx, (*C.X509)(unsafe.Pointer(cert.X509)))) != 1 {
-		return errors.New("problem loading cert " + sslerr.SSLErrorMessage())
+		return errors.New("problem loading cert " + sslerr.SSLErrorMessage().String())
 	}
 	return nil
 }
@@ -81,7 +81,7 @@ func (self *Context) UseRSAPrivateKeyFile(file string, filetype int) error {
 	ret := int(C.SSL_CTX_use_RSAPrivateKey_file(self.Ctx,
 		C.CString(file), C.int(filetype)))
 	if ret != 1 {
-		return errors.New(sslerr.SSLErrorMessage())
+		return errors.New(sslerr.SSLErrorMessage().String())
 	}
 	return nil
 
@@ -96,7 +96,7 @@ func (self *Context) UsePrivateKeyFile(file string, filetype int) error {
 	ret := int(C.SSL_CTX_use_PrivateKey_file(self.Ctx,
 		C.CString(file), C.int(filetype)))
 	if ret != 1 {
-		return errors.New(sslerr.SSLErrorMessage())
+		return errors.New(sslerr.SSLErrorMessage().String())
 	}
 	return nil
 
@@ -105,7 +105,7 @@ func (self *Context) UseCertificateFile(file string, filetype int) error {
 	ret := int(C.SSL_CTX_use_certificate_file(self.Ctx,
 		C.CString(file), C.int(filetype)))
 	if ret != 1 {
-		return errors.New(sslerr.SSLErrorMessage())
+		return errors.New(sslerr.SSLErrorMessage().String())
 	}
 	return nil
 }
@@ -113,7 +113,7 @@ func (self *Context) UseCertificateChainFile(file string) error {
 	ret := int(C.SSL_CTX_use_certificate_chain_file(self.Ctx,
 		C.CString(file)))
 	if ret != 1 {
-		return errors.New(sslerr.SSLErrorMessage())
+		return errors.New(sslerr.SSLErrorMessage().String())
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (self *Context) SetVerifyDepth(depth int) {
 }
 func (self *Context) CheckPrivateKey() error {
 	if int(C.SSL_CTX_check_private_key(self.Ctx)) != 1 {
-		return errors.New(sslerr.SSLErrorMessage())
+		return errors.New(sslerr.SSLErrorMessage().String())
 	}
 	return nil
 }

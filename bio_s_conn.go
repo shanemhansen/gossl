@@ -44,7 +44,8 @@ func go_conn_bio_read(bio *C.BIO, buf *C.char, num C.int) C.int {
 	var conn *Conn = (*Conn)(bio.ptr)
 	var size int = int(num)
 	data := GoSliceFromCString(buf, size)
-	if n, err := conn.conn.Read(data); err == nil {
+	n, err := conn.conn.Read(data)
+	if err == nil {
 		return C.int(n)
 	}
 	if err == io.EOF || err == io.ErrUnexpectedEOF {

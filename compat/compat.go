@@ -20,7 +20,7 @@ func NewListener(inner net.Listener, config *tls.Config) (net.Listener, error) {
 	//FIXME hardcoded in method
 	l.Context = gossl.NewContext(gossl.SSLv23Method())
 	if l.Context == nil {
-		msg := sslerr.SSLErrorMessage()
+		msg := sslerr.SSLErrorMessage().String()
 		return nil, errors.New("problem creating ssl context:\n" + msg)
 	}
 	//set certificates
@@ -34,7 +34,7 @@ func NewListener(inner net.Listener, config *tls.Config) (net.Listener, error) {
 	//set the private key into the context
 	err = l.Context.UsePrivateKey(private_key)
 	if err != nil {
-		return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage())
+		return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage().String())
 	}
 	cert, err := gossl.ParseCertificate(config.Certificates[0].Certificate[0])
 	if err != nil {
@@ -42,7 +42,7 @@ func NewListener(inner net.Listener, config *tls.Config) (net.Listener, error) {
 	}
 	err = l.Context.UseCertificate(cert)
 	if err != nil {
-		return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage())
+		return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage().String())
 	}
 	return l, nil
 }
