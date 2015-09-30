@@ -1,50 +1,63 @@
 package md5
 
 /*
-#include "openssl/md5.h"
 #cgo pkg-config: openssl
+#include "openssl/md5.h"
 */
 import "C"
 import (
 	"hash"
 	"unsafe"
+
+	"github.com/shanemhansen/gossl/sslerr"
 )
 
-// The blocksize of MD5 in bytes.
-const BlockSize = 64
+const (
+	// The size of an MD5 checksum in bytes.
+	Size = C.MD5_DIGEST_LENGTH
 
-// The size of an MD5 checksum in bytes.
-const Size = 16
+	// The blocksize of MD5 in bytes.
+	BlockSize = 64
+)
 
-type MD5Hash struct {
-	md5 C.MD5_CTX
+type digest struct {
+	ctx C.MD5_CTX
 }
 
-func (mh *MD5Hash) Write(msg []byte) (n int, err error) {
+func (d *digest) Reset() {
+	C.MD5_Init(&d.ctx)
+}
+
+// New returns a new MD5 hash.Hash
+// if the returned hash is empty, then make a call to sslerr.Error()
+func New() hash.Hash {
+	d := new(digest)
+	if C.MD5_Init(&d.ctx) != 1 {
+		return nil
+	}
+	return d
+}
+
+func (d *digest) BlockSize() int { return BlockSize }
+
+func (d *digest) Size() int { return Size }
+
+func (d *digest) Write(msg []byte) (n int, err error) {
 	size := C.size_t(len(msg))
-	if C.MD5_Update(&mh.md5, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
-		panic("problem updating hash")
+	if C.MD5_Update(&d.ctx, unsafe.Pointer(C.CString(string(msg))), size) != 1 {
+		return 0, sslerr.Error()
 	}
 	return len(msg), nil
 }
-func (mh *MD5Hash) BlockSize() int {
-	return C.MD5_DIGEST_LENGTH
-}
-func (mh *MD5Hash) Size() int {
-	return C.MD5_DIGEST_LENGTH
-}
-func (mh *MD5Hash) Reset() {
-	C.MD5_Init(&mh.md5)
-}
-func (mh *MD5Hash) Sum(b []byte) []byte {
-	digest := make([]C.uchar, mh.Size())
+
+func (d *digest) Sum(b []byte) []byte {
+	buf := make([]C.uchar, d.Size())
 	// make a copy of the pointer, so our context does not get freed.
 	// this allows further writes.
 	// TODO perhaps we should think about runtime.SetFinalizer to free the context?
-	s_tmp := C.MD5_CTX(mh.md5)
-	if C.MD5_Final(&digest[0], &s_tmp) != 1 {
-		// TODO maybe not panic here?
-		panic("couldn't finalize digest")
+	ctxTmp := C.MD5_CTX(d.ctx)
+	if C.MD5_Final(&buf[0], &ctxTmp) != 1 {
+		return make([]byte, 0)
 	}
 	var result []byte
 	if b != nil {
@@ -52,7 +65,7 @@ func (mh *MD5Hash) Sum(b []byte) []byte {
 	} else {
 		result = b
 	}
-	for _, value := range digest {
+	for _, value := range buf {
 		result = append(result, byte(value))
 	}
 	return result
@@ -66,13 +79,4 @@ func Sum(b []byte) [Size]byte {
 	var cs [Size]byte
 	copy(cs[:], s.Sum(nil))
 	return cs
-}
-
-// New returns a new hash.Hash computing the MD5 checksum.
-func New() hash.Hash {
-	h := new(MD5Hash)
-	if C.MD5_Init(&h.md5) != 1 {
-		panic("problem creating hash")
-	}
-	return h
 }
