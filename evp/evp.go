@@ -68,7 +68,7 @@ func LoadPrivateKeyPEM(buf []byte) (*PKey, error) {
 
 	pkey := C.PEM_read_bio_PrivateKey(bio, nil, nil, nil)
 	if pkey == nil {
-		return nil, errors.New("Problem reading key:" + sslerr.SSLErrorMessage())
+		return nil, errors.New("Problem reading key:" + sslerr.SSLErrorMessage().String())
 	}
 	return &PKey{PKey: pkey}, nil
 }
