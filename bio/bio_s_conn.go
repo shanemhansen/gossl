@@ -1,21 +1,21 @@
-package gossl
+package bio
 
 /*
 #cgo pkg-config: openssl
-#include "openssl/ssl.h"
-#include "openssl/err.h"
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 extern void go_conn_put_error(const char*);
 extern void set_errno(int);
 */
 import "C"
-import "io"
-import "unsafe"
-import "reflect"
-import "syscall"
-import "fmt"
-import "net"
-
-var _ = fmt.Println
+import (
+	"io"
+	"net"
+	"reflect"
+	"syscall"
+	"unsafe"
+)
 
 //export go_conn_bio_write
 func go_conn_bio_write(bio *C.BIO, buf *C.char, num C.int) C.int {
@@ -94,12 +94,7 @@ func go_conn_bio_ctrl(bio *C.BIO, cmd C.int, num C.long, ptr unsafe.Pointer) C.l
 	return C.long(1)
 }
 
-// Provides a zero copy interface for returning a go slice backed by a c array.
 func GoSliceFromCString(cArray *C.char, size int) (cslice []byte) {
-	//See http://code.google.com/p/go-wiki/wiki/cgo
-	//It turns out it's really easy to
-	//make a string from a *C.char and vise versa.
-	//not so easy to write to a c array.
 	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cslice)))
 	sliceHeader.Cap = size
 	sliceHeader.Len = size

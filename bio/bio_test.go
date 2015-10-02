@@ -1,7 +1,9 @@
-package gossl
+package bio
 
-import "testing"
-import "bytes"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestMemoryBIO(t *testing.T) {
 	bio := NewBIO(BIOSMem())
