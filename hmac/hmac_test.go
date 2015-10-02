@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/shanemhansen/gossl/engine"
-	"github.com/shanemhansen/gossl/nid"
 	"github.com/shanemhansen/gossl/sha256"
 	"github.com/shanemhansen/gossl/sslerr"
 )
@@ -12,7 +11,8 @@ import (
 func TestHMACNewWithEngine(t *testing.T) {
 	engine.LoadBuiltinEngines()
 
-	eng := engine.NewFunctionalByDigestEngine(nid.NID_hmac_sha1)
+	// NID_hmac_sha1 781
+	eng := engine.NewFunctionalByDigestEngine(781)
 	hmacWithEngine := NewWithEngine(eng, sha256.New, nil)
 
 	if hmacWithEngine == nil {

@@ -5,7 +5,7 @@ package engine
 
 /*
 #cgo pkg-config: openssl
-#include "openssl/engine.h"
+#include <openssl/engine.h>
 */
 import "C"
 import (

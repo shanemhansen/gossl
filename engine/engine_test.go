@@ -2,8 +2,6 @@ package engine
 
 import (
 	"testing"
-
-	"github.com/shanemhansen/gossl/nid"
 )
 
 //These tests depend on your hardware and kernel.
@@ -18,8 +16,10 @@ func TestFunctionalEngines(t *testing.T) {
 	var e *Engine
 	e = NewFunctionalDefaultRSA()
 	t.Log(e)
-	e = NewFunctionalByCipherEngine(nid.NID_aes_128_cbc)
+	// NID_aes_128_cbc 419
+	e = NewFunctionalByCipherEngine(419)
 	t.Log(e)
-	e = NewFunctionalByCipherEngine(nid.NID_sha256)
+	// NID_sha256 672
+	e = NewFunctionalByCipherEngine(672)
 	t.Log(e)
 }
