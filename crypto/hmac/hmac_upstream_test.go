@@ -9,10 +9,10 @@ import (
 	"hash"
 	"testing"
 
-	"github.com/shanemhansen/gossl/md5"
-	"github.com/shanemhansen/gossl/sha1"
-	"github.com/shanemhansen/gossl/sha256"
-	"github.com/shanemhansen/gossl/sha512"
+	"github.com/shanemhansen/gossl/crypto/md5"
+	"github.com/shanemhansen/gossl/crypto/sha1"
+	"github.com/shanemhansen/gossl/crypto/sha256"
+	"github.com/shanemhansen/gossl/crypto/sha512"
 )
 
 type hmacTest struct {
