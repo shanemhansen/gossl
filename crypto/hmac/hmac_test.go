@@ -3,8 +3,8 @@ package hmac
 import (
 	"testing"
 
-	"github.com/shanemhansen/gossl/engine"
-	"github.com/shanemhansen/gossl/sha256"
+	"github.com/shanemhansen/gossl/crypto/engine"
+	"github.com/shanemhansen/gossl/crypto/sha256"
 	"github.com/shanemhansen/gossl/sslerr"
 )
 

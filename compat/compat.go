@@ -10,7 +10,7 @@ import "crypto/rsa"
 import "crypto/x509"
 import "errors"
 import "github.com/shanemhansen/gossl"
-import "github.com/shanemhansen/gossl/evp"
+import "github.com/shanemhansen/gossl/crypto/evp"
 import "github.com/shanemhansen/gossl/sslerr"
 
 //Wrap an existing listener + crypto config and return a new TLS enabled listener.

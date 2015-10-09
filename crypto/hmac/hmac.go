@@ -18,7 +18,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/shanemhansen/gossl/engine"
+	"github.com/shanemhansen/gossl/crypto/engine"
 	"github.com/shanemhansen/gossl/sslerr"
 )
 

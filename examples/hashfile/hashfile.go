@@ -3,7 +3,7 @@ package main
 import "os"
 import "io"
 import "fmt"
-import "github.com/shanemhansen/gossl/sha256"
+import "github.com/shanemhansen/gossl/crypto/sha256"
 import "flag"
 
 func main() {
