@@ -15,7 +15,7 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
-	ctx := gossl.NewContext(gossl.SSLv3Method())
+	ctx := gossl.NewContext(gossl.TLSv1_2Method())
 	ctx.SetOptions(gossl.OP_NO_COMPRESSION)
 	err := ctx.UsePrivateKeyFile(*keypath, gossl.FILETYPE_PEM)
 	if err != nil {
