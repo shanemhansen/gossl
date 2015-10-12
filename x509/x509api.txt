@@ -103,7 +103,6 @@ pkg crypto/x509, method (*Certificate) CheckSignatureFrom(*Certificate) error
 pkg crypto/x509, method (*Certificate) CreateCRL(io.Reader, interface{}, []pkix.RevokedCertificate, time.Time, time.Time) ([]uint8, error)
 pkg crypto/x509, method (*Certificate) Equal(*Certificate) bool
 pkg crypto/x509, method (*Certificate) Verify(VerifyOptions) ([][]*Certificate, error)
-pkg crypto/x509, method (*Certificate) VerifyHostname(string) error
 pkg crypto/x509, method (*CertificateRequest) CheckSignature() error
 pkg crypto/x509, method (CertificateInvalidError) Error() string
 pkg crypto/x509, method (ConstraintViolationError) Error() string

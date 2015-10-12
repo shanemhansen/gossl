@@ -53,6 +53,7 @@ import (
 	"errors"
 	"io"
 	"math/big"
+	"net"
 	"unsafe"
 
 	"github.com/shanemhansen/gossl/sslerr"
@@ -79,6 +80,9 @@ type Certificate struct {
 	SerialNumber *big.Int
 	Issuer       string
 	Subject      string
+
+	IPAddresses []net.IP
+	DNSNames    []string
 
 	//TODO(runcom): add more pub fields
 }
