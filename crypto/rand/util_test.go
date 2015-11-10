@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package rand_test
+package rand
 
 import (
-	rand "."
 	"math/big"
 	"testing"
 )
@@ -13,7 +12,7 @@ import (
 // http://golang.org/issue/6849.
 func TestPrimeSmall(t *testing.T) {
 	for n := 2; n < 10; n++ {
-		p, err := rand.Prime(rand.Reader, n)
+		p, err := Prime(Reader, n)
 		if err != nil {
 			t.Fatalf("Can't generate %d-bit prime: %v", n, err)
 		}
@@ -28,7 +27,7 @@ func TestPrimeSmall(t *testing.T) {
 
 // Test that passing bits < 2 causes Prime to return nil, error
 func TestPrimeBitsLt2(t *testing.T) {
-	if p, err := rand.Prime(rand.Reader, 1); p != nil || err == nil {
+	if p, err := Prime(Reader, 1); p != nil || err == nil {
 		t.Errorf("Prime should return nil, error when called with bits < 2")
 	}
 }
@@ -37,7 +36,7 @@ func TestInt(t *testing.T) {
 	// start at 128 so the case of (max.BitLen() % 8) == 0 is covered
 	for n := 128; n < 140; n++ {
 		b := new(big.Int).SetInt64(int64(n))
-		if i, err := rand.Int(rand.Reader, b); err != nil {
+		if i, err := Int(Reader, b); err != nil {
 			t.Fatalf("Can't generate random value: %v, %v", i, err)
 		}
 	}
@@ -49,7 +48,7 @@ func testIntPanics(t *testing.T, b *big.Int) {
 			t.Errorf("Int should panic when called with max <= 0: %v", b)
 		}
 	}()
-	rand.Int(rand.Reader, b)
+	Int(Reader, b)
 }
 
 // Test that passing a new big.Int as max causes Int to panic
