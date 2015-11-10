@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package rand_test
+package rand
 
 import (
-	rand "."
 	"bytes"
 	"compress/flate"
 	"io"
@@ -18,7 +17,7 @@ func TestRead(t *testing.T) {
 		n = 1e5
 	}
 	b := make([]byte, n)
-	n, err := io.ReadFull(rand.Reader, b)
+	n, err := io.ReadFull(Reader, b)
 	//t.Fatalf("%d", len(b))
 	if n != len(b) || err != nil {
 		t.Fatalf("ReadFull(buf) = %d, %s", n, err)
@@ -34,11 +33,11 @@ func TestRead(t *testing.T) {
 }
 
 func TestReadEmpty(t *testing.T) {
-	n, err := rand.Reader.Read(make([]byte, 0))
+	n, err := Reader.Read(make([]byte, 0))
 	if n != 0 || err != nil {
 		t.Fatalf("Read(make([]byte, 0)) = %d, %v", n, err)
 	}
-	n, err = rand.Reader.Read(nil)
+	n, err = Reader.Read(nil)
 	if n != 0 || err != nil {
 		t.Fatalf("Read(nil) = %d, %v", n, err)
 	}

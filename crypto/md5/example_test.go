@@ -5,9 +5,10 @@
 package md5_test
 
 import (
-	"crypto/md5"
 	"fmt"
 	"io"
+
+	"github.com/shanemhansen/gossl/crypto/md5"
 )
 
 func ExampleNew() {

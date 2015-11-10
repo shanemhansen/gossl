@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 import "flag"
-import "github.com/shanemhansen/gossl/evp"
+import "github.com/shanemhansen/gossl/crypto/evp"
 import "io/ioutil"
 
 func main() {
