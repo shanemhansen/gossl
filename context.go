@@ -4,19 +4,30 @@ package gossl
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 #include "openssl/stack.h"
-extern int get_errno(void);
-
 */
 import "C"
-import "unsafe"
-import "github.com/shanemhansen/gossl/crypto/evp"
-import "github.com/shanemhansen/gossl/sslerr"
-import "runtime"
-import "errors"
-import "fmt"
-import "time"
+import (
+	"errors"
+	"runtime"
+	"time"
+	"unsafe"
 
-var _ = fmt.Println
+	"github.com/shanemhansen/gossl/crypto/evp"
+	"github.com/shanemhansen/gossl/sslerr"
+)
+
+type Option int64
+
+const (
+	OpNoCompression Option = C.SSL_OP_NO_COMPRESSION
+)
+
+type FileType int
+
+const (
+	FileTypePem  FileType = C.SSL_FILETYPE_PEM
+	FileTypeASN1 FileType = C.SSL_FILETYPE_ASN1
+)
 
 type Context struct {
 	Ctx *C.SSL_CTX
@@ -86,13 +97,13 @@ func (self *Context) UseRSAPrivateKeyFile(file string, filetype int) error {
 	return nil
 
 }
-func (self *Context) SetOptions(options int) {
-	self.Ctrl(C.SSL_CTRL_OPTIONS, options, nil)
+func (self *Context) SetOptions(options Option) {
+	self.Ctrl(C.SSL_CTRL_OPTIONS, int(options), nil)
 }
 func (self *Context) GetOptions() int {
 	return int(self.Ctrl(C.SSL_CTRL_OPTIONS, 0, nil))
 }
-func (self *Context) UsePrivateKeyFile(file string, filetype int) error {
+func (self *Context) UsePrivateKeyFile(file string, filetype FileType) error {
 	ret := int(C.SSL_CTX_use_PrivateKey_file(self.Ctx,
 		C.CString(file), C.int(filetype)))
 	if ret != 1 {
@@ -101,7 +112,7 @@ func (self *Context) UsePrivateKeyFile(file string, filetype int) error {
 	return nil
 
 }
-func (self *Context) UseCertificateFile(file string, filetype int) error {
+func (self *Context) UseCertificateFile(file string, filetype FileType) error {
 	ret := int(C.SSL_CTX_use_certificate_file(self.Ctx,
 		C.CString(file), C.int(filetype)))
 	if ret != 1 {
