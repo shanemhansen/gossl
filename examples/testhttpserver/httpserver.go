@@ -16,12 +16,12 @@ func main() {
 		return
 	}
 	ctx := gossl.NewContext(gossl.SSLv3Method())
-	ctx.SetOptions(gossl.OP_NO_COMPRESSION)
-	err := ctx.UsePrivateKeyFile(*keypath, gossl.FILETYPE_PEM)
+	ctx.SetOptions(gossl.OpNoCompression)
+	err := ctx.UsePrivateKeyFile(*keypath, gossl.FileTypePem)
 	if err != nil {
 		panic(err)
 	}
-	ctx.UseCertificateFile(*certpath, gossl.FILETYPE_PEM)
+	ctx.UseCertificateFile(*certpath, gossl.FileTypePem)
 	if err != nil {
 		panic(err)
 	}
