@@ -1,12 +1,16 @@
 package gossl
 
-import "testing"
-import "github.com/shanemhansen/gossl/crypto/evp"
+import (
+	"testing"
+
+	"github.com/shanemhansen/gossl/crypto/evp"
+	"github.com/shanemhansen/gossl/crypto/x509"
+)
 
 func TestContext(t *testing.T) {
 	c := NewContext(SSLv3Method())
 	pkey, err := evp.LoadPrivateKeyPEM(key_pem)
-	cert, err := ParseCertificatePEM(cert_pem)
+	cert, err := x509.ParseCertificatePEM(cert_pem)
 	if err != nil {
 		t.Fatal(err)
 	}
