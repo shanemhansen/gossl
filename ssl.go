@@ -3,8 +3,11 @@ package gossl
 /*
 #include "openssl/ssl.h"
 #include "openssl/err.h"
-extern int get_errno(void);
 
+static int get_errno(void)
+{
+	return errno;
+}
 */
 import "C"
 import "io"
