@@ -18,6 +18,7 @@ import (
 	"unsafe"
 
 	"github.com/shanemhansen/gossl/crypto/evp"
+	"github.com/shanemhansen/gossl/crypto/x509"
 	"github.com/shanemhansen/gossl/sslerr"
 )
 
@@ -54,9 +55,8 @@ func (self *Context) UsePrivateKey(key *evp.PKey) error {
 	return nil
 }
 
-func (self *Context) UseCertificate(cert *Certificate) error {
-
-	if int(C.SSL_CTX_use_certificate(self.Ctx, (*C.X509)(unsafe.Pointer(cert.X509)))) != 1 {
+func (self *Context) UseCertificate(cert *x509.Certificate) error {
+	if int(C.SSL_CTX_use_certificate(self.Ctx, (*C.X509)(unsafe.Pointer(cert.GetX509())))) != 1 {
 		return errors.New("problem loading cert " + sslerr.SSLErrorMessage().String())
 	}
 	return nil
@@ -84,12 +84,14 @@ func (self *Context) SetTimeout(t time.Time) {
 func (self *Context) GetTimeout() time.Time {
 	return time.Unix(int64(C.SSL_CTX_get_timeout(self.Ctx)), 0)
 }
-func (self *Context) GetCertStore() *X509Store {
-	return &X509Store{Store: C.SSL_CTX_get_cert_store(self.Ctx)}
+
+func (self *Context) GetCertStore() *x509.X509Store {
+	return x509.NewX509Store(unsafe.Pointer(self.Ctx))
 }
-func (self *Context) SetCertStore(store *X509Store) {
-	C.SSL_CTX_set_cert_store(self.Ctx, store.Store)
+func (self *Context) SetCertStore(store *x509.X509Store) {
+	C.SSL_CTX_set_cert_store(self.Ctx, (*C.X509_STORE)(unsafe.Pointer(store.Store)))
 }
+
 func (self *Context) FlushSessions(t time.Time) {
 	C.SSL_CTX_flush_sessions(self.Ctx, C.long(t.Unix()))
 }
@@ -157,7 +159,7 @@ func (self *Context) SetPurpose(purpose int) int {
 func (self *Context) SetTrust(trust int) int {
 	return int(C.SSL_CTX_set_trust(self.Ctx, C.int(trust)))
 }
-func (self *Context) SetClientCAList(names []X509Name) {
+func (self *Context) SetClientCAList(names []x509.X509Name) {
 	s := C.sk_new(nil)
 	for i := range names {
 		C.sk_push(s, unsafe.Pointer(names[i].Name))
@@ -167,8 +169,8 @@ func (self *Context) SetClientCAList(names []X509Name) {
 	//Stacks because they are all macro based.
 	C.SSL_CTX_set_client_CA_list(self.Ctx, (*C.struct_stack_st_X509_NAME)(unsafe.Pointer(s)))
 }
-func (self *Context) AddClientCA(cert *Certificate) int {
-	return int(C.SSL_CTX_add_client_CA(self.Ctx, cert.X509))
+func (self *Context) AddClientCA(cert *x509.Certificate) int {
+	return int(C.SSL_CTX_add_client_CA(self.Ctx, (*C.X509)(unsafe.Pointer(cert.GetX509()))))
 }
 func (self *Context) SetQuietShutdown(mode int) {
 	C.SSL_CTX_set_quiet_shutdown(self.Ctx, C.int(mode))

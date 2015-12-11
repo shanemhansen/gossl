@@ -7,10 +7,11 @@ import "io/ioutil"
 import "net"
 import "crypto/tls"
 import "crypto/rsa"
-import "crypto/x509"
+import GoX509 "crypto/x509"
 import "errors"
 import "github.com/shanemhansen/gossl"
 import "github.com/shanemhansen/gossl/crypto/evp"
+import "github.com/shanemhansen/gossl/crypto/x509"
 import "github.com/shanemhansen/gossl/sslerr"
 
 //Wrap an existing listener + crypto config and return a new TLS enabled listener.
@@ -36,7 +37,7 @@ func NewListener(inner net.Listener, config *tls.Config) (net.Listener, error) {
 	if err != nil {
 		return nil, errors.New("problem loading key " + sslerr.SSLErrorMessage().String())
 	}
-	cert, err := gossl.ParseCertificate(config.Certificates[0].Certificate[0])
+	cert, err := x509.ParseCertificate(config.Certificates[0].Certificate[0])
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func extractDERKey(Kr interface{}) ([]byte, error) {
 		return nil, errors.New("crypto/tls: found non-RSA private key")
 	}
 	//get the raw bytes
-	private_key_der := x509.MarshalPKCS1PrivateKey(key)
+	private_key_der := GoX509.MarshalPKCS1PrivateKey(key)
 	return private_key_der, nil
 
 }
