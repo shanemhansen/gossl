@@ -348,8 +348,9 @@ func GenerateKey(curve elliptic.Curve, rand io.Reader) (priv []byte, x, y *big.I
 	if blen == 0 {
 		return nil, nil, nil, errors.New("can't get private key")
 	}
-	buf := make([]C.uchar, int(blen))
-	pkey := (*C.uchar)(&buf[0])
+	buf := C.malloc(C.size_t(blen))
+	defer C.free(buf)
+	pkey := (*C.uchar)(unsafe.Pointer(buf))
 	if C.i2d_ECPrivateKey(k, &pkey) == 0 {
 		return nil, nil, nil, errors.New("can't get private key")
 	}
