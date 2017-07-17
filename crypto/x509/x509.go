@@ -97,10 +97,13 @@ func ParseCertificate(asn1Data []byte) (*Certificate, error) {
 	var (
 		c       *C.X509
 		dlen    = C.long(len(asn1Data))
-		buf     = (*C.uchar)(&asn1Data[0])
+		p       = C.malloc(C.size_t(len(asn1Data)))
 		counter = C.long(0)
 	)
-	c = C.d2i_X509_with_counter(&buf, dlen, &counter)
+	defer C.free(p)
+	cBuf := (*[1 << 30]byte)(p)
+	copy(cBuf[:], asn1Data)
+	c = C.d2i_X509_with_counter((**C.uchar)(unsafe.Pointer(&cBuf)), dlen, &counter)
 	if c == nil {
 		return nil, errors.New("error parsing der data: " + sslerr.SSLErrorMessage().String())
 	}
@@ -117,12 +120,15 @@ func ParseCertificates(asn1Data []byte) ([]*Certificate, error) {
 	var (
 		cs      []*Certificate
 		dlen    = C.long(len(asn1Data))
-		buf     = (*C.uchar)(&asn1Data[0])
+		p       = C.malloc(C.size_t(len(asn1Data)))
 		counter = C.long(0)
 		prev    int
 	)
+	defer C.free(p)
+	cBuf := (*[1 << 30]byte)(p)
+	copy(cBuf[:], asn1Data)
 	for counter < dlen {
-		c := C.d2i_X509_with_counter(&buf, dlen, &counter)
+		c := C.d2i_X509_with_counter((**C.uchar)(unsafe.Pointer(&cBuf)), dlen, &counter)
 		if c == nil {
 			return nil, errors.New("error parsing der data: " + sslerr.SSLErrorMessage().String())
 		}
