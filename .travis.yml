@@ -7,7 +7,7 @@ go:
   - 1.6.x
 
 # maybe one day
-#  - go get github.com/golang/lint/golint
+#  - go get golang.org/x/lint/golint
 
 sudo: false
 
